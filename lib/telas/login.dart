@@ -50,15 +50,19 @@ class _LoginState extends State<Login> {
           Container(
             margin: EdgeInsets.only(top: 20),
             child: TextField(
-                decoration: InputDecoration(
-                    labelText: "Senha",
-                    labelStyle: TextStyle(
-                        color: Colors.black45, fontWeight: FontWeight.bold),
-                    fillColor: Colors.white,
-                    filled: true,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(50.0),
-                    ))),
+              decoration: InputDecoration(
+                  labelText: "Senha",
+                  labelStyle: TextStyle(
+                      color: Colors.black45, fontWeight: FontWeight.bold),
+                  fillColor: Colors.white,
+                  filled: true,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(50.0),
+                  )),
+              obscureText: true,
+              enableSuggestions: false,
+              autocorrect: false,
+            ),
           ),
           Container(
             margin: EdgeInsets.only(top: 20),

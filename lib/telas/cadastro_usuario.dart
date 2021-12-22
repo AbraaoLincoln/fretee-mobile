@@ -13,6 +13,10 @@ class CadastroUsuario extends StatefulWidget {
 
 class _CadastroUsuarioState extends State<CadastroUsuario> {
   File? _image;
+  final _nomeCompletoTextControlle = TextEditingController();
+  final _telefoneTextControlle = TextEditingController();
+  final _nomeUsuarioTextControlle = TextEditingController();
+  final _senhaTextControlle = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -21,16 +25,19 @@ class _CadastroUsuarioState extends State<CadastroUsuario> {
         title: Text("Cadastra-se"),
         backgroundColor: Colors.black,
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: EdgeInsets.all(10),
         child: Column(
-          children: [_SeletorImagem()],
+          children: [
+            _ConstruirSeletorImagem(),
+            _ConstruirformularioDeCadastro()
+          ],
         ),
       ),
     );
   }
 
-  Widget _SeletorImagem() {
+  Widget _ConstruirSeletorImagem() {
     return Container(
       decoration: BoxDecoration(
           border: Border.all(color: Colors.grey.shade400),
@@ -97,5 +104,65 @@ class _CadastroUsuarioState extends State<CadastroUsuario> {
     } on PlatformException catch (e) {
       print("Não foi possivel selecionar a imagem");
     }
+  }
+
+  Widget _ConstruirformularioDeCadastro() {
+    return Container(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _ConstruitInputDoFormulatio("Nome Completo",
+              _nomeCompletoTextControlle, TextInputType.text, false),
+          _ConstruitInputDoFormulatio(
+              "Telefone", _telefoneTextControlle, TextInputType.number, false),
+          _ConstruitInputDoFormulatio("Nome de Usuario",
+              _nomeUsuarioTextControlle, TextInputType.text, false),
+          _ConstruitInputDoFormulatio(
+              "Senha", _senhaTextControlle, TextInputType.text, true),
+          Container(
+            margin: EdgeInsets.only(top: 20),
+            child: TextButton(
+                onPressed: selecionarImagemDaGaleria,
+                child: Text(
+                  "Cadastrar",
+                  style: TextStyle(fontSize: 20),
+                ),
+                style: TextButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    primary: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(50),
+                    ),
+                    // elevation: 15.0,
+                    minimumSize: Size(100, 50))),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _ConstruitInputDoFormulatio(
+      String label,
+      TextEditingController controller,
+      TextInputType keyboardType,
+      bool obscureText) {
+    return Container(
+      margin: EdgeInsets.only(top: 20),
+      child: TextFormField(
+          keyboardType: keyboardType,
+          decoration: InputDecoration(
+              labelText: label,
+              labelStyle:
+                  TextStyle(color: Colors.black45, fontWeight: FontWeight.bold),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: Colors.grey.shade400),
+              )),
+          controller: controller,
+          validator: (value) {},
+          obscureText: obscureText,
+          enableSuggestions: !obscureText,
+          autocorrect: !obscureText),
+    );
   }
 }
