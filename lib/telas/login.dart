@@ -69,7 +69,7 @@ class _LoginState extends State<Login> {
             height: 55,
             child: TextButton(
               onPressed: () {},
-              child: Text("Entrar"),
+              child: Text("Entrar", style: TextStyle(fontSize: 20)),
               style: ButtonStyle(
                   foregroundColor:
                       MaterialStateProperty.all<Color>(Colors.white),
@@ -91,7 +91,7 @@ class _LoginState extends State<Login> {
                     MaterialPageRoute(builder: (context) => CadastroUsuario()),
                   );
                 },
-                child: Text("Cadastra-se"),
+                child: Text("Cadastra-se", style: TextStyle(fontSize: 20)),
                 style: ButtonStyle(
                     foregroundColor:
                         MaterialStateProperty.all<Color>(Colors.white),

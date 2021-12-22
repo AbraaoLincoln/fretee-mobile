@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
 
 class CadastroUsuario extends StatefulWidget {
   const CadastroUsuario({Key? key}) : super(key: key);
@@ -122,7 +123,7 @@ class _CadastroUsuarioState extends State<CadastroUsuario> {
           Container(
             margin: EdgeInsets.only(top: 20),
             child: TextButton(
-                onPressed: selecionarImagemDaGaleria,
+                onPressed: _cadastrarUsuario,
                 child: Text(
                   "Cadastrar",
                   style: TextStyle(fontSize: 20),
@@ -159,10 +160,28 @@ class _CadastroUsuarioState extends State<CadastroUsuario> {
                 borderSide: BorderSide(color: Colors.grey.shade400),
               )),
           controller: controller,
-          validator: (value) {},
+          validator: (value) {
+            if (value!.isEmpty) return "Insira o/a ${label}";
+          },
           obscureText: obscureText,
           enableSuggestions: !obscureText,
           autocorrect: !obscureText),
     );
+  }
+
+  void _cadastrarUsuario() async {
+    var request = http.MultipartRequest(
+        "POST", Uri.parse("http://192.168.0.243:8080/fretee/api/usuario/"));
+
+    request.fields["nome"] = _nomeCompletoTextControlle.text;
+    request.fields["telefone"] = _telefoneTextControlle.text;
+    request.fields["nomeAutenticacao"] = _nomeUsuarioTextControlle.text;
+    request.fields["senha"] = _senhaTextControlle.text;
+
+    var imageUsuario = await http.MultipartFile.fromPath("foto", _image!.path);
+
+    request.files.add(imageUsuario);
+
+    var response = await request.send();
   }
 }
