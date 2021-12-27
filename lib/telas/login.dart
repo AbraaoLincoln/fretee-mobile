@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import './cadastro_prestadorServico.dart';
 import './cadastro_usuario.dart';
 
 class Login extends StatefulWidget {
@@ -22,6 +23,7 @@ class _LoginState extends State<Login> {
         children: [
           Container(
             margin: EdgeInsets.only(top: 20),
+            padding: EdgeInsets.only(left: 10),
             child: Text(
               "Fretee",
               style: TextStyle(color: Colors.white, fontSize: 25),
@@ -30,10 +32,8 @@ class _LoginState extends State<Login> {
           ),
           Container(
             margin: EdgeInsets.only(top: 20),
-            child: Text(
-              _textoSaudacao(),
-              style: TextStyle(color: Colors.white, fontSize: 25),
-            ),
+            padding: EdgeInsets.only(left: 10, right: 10),
+            child: _textoSaudacao(),
           ),
           Container(
             margin: EdgeInsets.only(top: 20),
@@ -68,7 +68,13 @@ class _LoginState extends State<Login> {
             margin: EdgeInsets.only(top: 20),
             height: 55,
             child: TextButton(
-              onPressed: () {},
+              onPressed: () {
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(
+                //       builder: (context) => ),
+                // );
+              },
               child: Text("Entrar", style: TextStyle(fontSize: 20)),
               style: ButtonStyle(
                   foregroundColor:
@@ -115,7 +121,28 @@ class _LoginState extends State<Login> {
     )));
   }
 
-  String _textoSaudacao() {
-    return "Boa Tarde, informe suas credenciais para ter acesso a sua conta ou cadastra-se.";
+  Widget _textoSaudacao() {
+    DateTime now = DateTime.now();
+    String saudacao;
+    double fontSize = 24;
+
+    if (now.hour <= 12) {
+      saudacao = "Bom Dia";
+    } else if (now.hour > 12 && now.hour < 18) {
+      saudacao = "Boa Tarde";
+    } else {
+      saudacao = "Boa Noite";
+    }
+
+    return RichText(
+        text: TextSpan(children: [
+      TextSpan(
+          text: saudacao,
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: fontSize)),
+      TextSpan(
+          text:
+              ", informe suas credenciais para ter acesso a sua conta ou cadastra-se.",
+          style: TextStyle(fontSize: fontSize))
+    ]));
   }
 }

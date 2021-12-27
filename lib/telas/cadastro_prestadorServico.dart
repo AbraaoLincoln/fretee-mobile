@@ -1,35 +1,54 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 
-class CadastroUsuario extends StatefulWidget {
-  const CadastroUsuario({Key? key}) : super(key: key);
+class CadastroPrestadorServico extends StatefulWidget {
+  const CadastroPrestadorServico({Key? key}) : super(key: key);
 
   @override
-  _CadastroUsuarioState createState() => _CadastroUsuarioState();
+  _CadastroPrestadorServicoState createState() =>
+      _CadastroPrestadorServicoState();
 }
 
-class _CadastroUsuarioState extends State<CadastroUsuario> {
+class _CadastroPrestadorServicoState extends State<CadastroPrestadorServico> {
   File? _image;
-  final _nomeCompletoTextControlle = TextEditingController();
-  final _telefoneTextControlle = TextEditingController();
-  final _nomeUsuarioTextControlle = TextEditingController();
-  final _senhaTextControlle = TextEditingController();
+  final _larguraTextControlle = TextEditingController();
+  final _alturaTextControlle = TextEditingController();
+  final _comprimentoTextControlle = TextEditingController();
+  final _placaTextControlle = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Cadastra-se"),
+        title: Text("Cadastro Prestador Serviço"),
         backgroundColor: Colors.black,
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(10),
         child: Column(
           children: [
+            Container(
+              padding: EdgeInsets.all(10),
+              child: Text(
+                "Para se cadastrar como prestador de serviço precisamos das informações do seu veiculo.",
+                style: TextStyle(fontSize: 17),
+              ),
+              decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(color: Colors.grey.shade400),
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 1,
+                      blurRadius: 1,
+                      offset: Offset(0, 1), // changes position of shadow
+                    ),
+                  ]),
+            ),
             _ConstruirSeletorImagem(),
             _ConstruirformularioDeCadastro()
           ],
@@ -40,6 +59,7 @@ class _CadastroUsuarioState extends State<CadastroUsuario> {
 
   Widget _ConstruirSeletorImagem() {
     return Container(
+      margin: EdgeInsets.only(top: 20),
       decoration: BoxDecoration(
           border: Border.all(color: Colors.grey.shade400),
           borderRadius: BorderRadius.circular(10)),
@@ -47,13 +67,13 @@ class _CadastroUsuarioState extends State<CadastroUsuario> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Container(
-            padding: EdgeInsets.all(10),
+            padding: EdgeInsets.fromLTRB(20, 10, 10, 10),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8.0),
               child: _image != null
                   ? Image.file(
                       _image!,
-                      width: 80,
+                      width: 100,
                       height: 80,
                       fit: BoxFit.cover,
                     )
@@ -72,7 +92,7 @@ class _CadastroUsuarioState extends State<CadastroUsuario> {
               children: [
                 TextButton(
                     onPressed: selecionarImagemDaGaleria,
-                    child: Text("Selecionar Imagem"),
+                    child: Text("Selecionar Imagem do veiculo"),
                     style: TextButton.styleFrom(
                         backgroundColor: Colors.black,
                         primary: Colors.white,
@@ -82,7 +102,7 @@ class _CadastroUsuarioState extends State<CadastroUsuario> {
                         // elevation: 15.0,
                         minimumSize: Size(100, 10))),
                 Text(
-                  "Escolha uma imagem que seu rosto esteja visivel.",
+                  "Escolha uma imagem que mostre bem o seu veiculo.",
                   style: TextStyle(fontSize: 10),
                   textAlign: TextAlign.center,
                 ),
@@ -112,18 +132,18 @@ class _CadastroUsuarioState extends State<CadastroUsuario> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _ConstruirInputDoFormulatio("Nome Completo",
-              _nomeCompletoTextControlle, TextInputType.text, false),
           _ConstruirInputDoFormulatio(
-              "Telefone", _telefoneTextControlle, TextInputType.number, false),
-          _ConstruirInputDoFormulatio("Nome de Usuario",
-              _nomeUsuarioTextControlle, TextInputType.text, false),
+              "Largura", _larguraTextControlle, TextInputType.number),
           _ConstruirInputDoFormulatio(
-              "Senha", _senhaTextControlle, TextInputType.text, true),
+              "Altura", _alturaTextControlle, TextInputType.number),
+          _ConstruirInputDoFormulatio(
+              "Comprimento", _comprimentoTextControlle, TextInputType.number),
+          _ConstruirInputDoFormulatio(
+              "Placa", _placaTextControlle, TextInputType.text),
           Container(
             margin: EdgeInsets.only(top: 20),
             child: TextButton(
-                onPressed: _cadastrarUsuario,
+                onPressed: () {},
                 child: Text(
                   "Cadastrar",
                   style: TextStyle(fontSize: 20),
@@ -142,11 +162,8 @@ class _CadastroUsuarioState extends State<CadastroUsuario> {
     );
   }
 
-  Widget _ConstruirInputDoFormulatio(
-      String label,
-      TextEditingController controller,
-      TextInputType keyboardType,
-      bool obscureText) {
+  Widget _ConstruirInputDoFormulatio(String label,
+      TextEditingController controller, TextInputType keyboardType) {
     return Container(
       margin: EdgeInsets.only(top: 20),
       child: TextFormField(
@@ -162,21 +179,18 @@ class _CadastroUsuarioState extends State<CadastroUsuario> {
           controller: controller,
           validator: (value) {
             if (value!.isEmpty) return "Insira o/a ${label}";
-          },
-          obscureText: obscureText,
-          enableSuggestions: !obscureText,
-          autocorrect: !obscureText),
+          }),
     );
   }
 
-  void _cadastrarUsuario() async {
+  void _cadastrarComoPrestadorServico() async {
     var request = http.MultipartRequest(
         "POST", Uri.parse("http://192.168.0.243:8080/fretee/api/usuario/"));
 
-    request.fields["nome"] = _nomeCompletoTextControlle.text;
-    request.fields["telefone"] = _telefoneTextControlle.text;
-    request.fields["nomeAutenticacao"] = _nomeUsuarioTextControlle.text;
-    request.fields["senha"] = _senhaTextControlle.text;
+    request.fields["nome"] = _larguraTextControlle.text;
+    request.fields["telefone"] = _comprimentoTextControlle.text;
+    request.fields["nomeAutenticacao"] = _alturaTextControlle.text;
+    request.fields["senha"] = _comprimentoTextControlle.text;
 
     var imageUsuario = await http.MultipartFile.fromPath("foto", _image!.path);
 
