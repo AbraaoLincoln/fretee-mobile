@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import './cadastro_prestadorServico.dart';
+import 'package:fretee_mobile/telas/busca.dart';
 import './cadastro_usuario.dart';
 
 class Login extends StatefulWidget {
@@ -69,11 +69,11 @@ class _LoginState extends State<Login> {
             height: 55,
             child: TextButton(
               onPressed: () {
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(
-                //       builder: (context) => ),
-                // );
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => BuscaPrestadoresServico()),
+                );
               },
               child: Text("Entrar", style: TextStyle(fontSize: 20)),
               style: ButtonStyle(
