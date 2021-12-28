@@ -23,11 +23,11 @@ class _CadastroUsuarioState extends State<CadastroUsuario> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Cadastra-se"),
+        title: const Text("Cadastra-se"),
         backgroundColor: Colors.black,
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(10),
+        padding: const EdgeInsets.all(10),
         child: Column(
           children: [
             _ConstruirSeletorImagem(),
@@ -47,7 +47,7 @@ class _CadastroUsuarioState extends State<CadastroUsuario> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Container(
-            padding: EdgeInsets.all(10),
+            padding: const EdgeInsets.all(10),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8.0),
               child: _image != null
@@ -57,7 +57,7 @@ class _CadastroUsuarioState extends State<CadastroUsuario> {
                       height: 80,
                       fit: BoxFit.cover,
                     )
-                  : Icon(
+                  : const Icon(
                       Icons.image,
                       size: 80,
                     ),

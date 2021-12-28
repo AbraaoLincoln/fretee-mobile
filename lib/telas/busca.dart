@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fretee_mobile/telas/solicita_servico.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 
@@ -149,60 +150,68 @@ class _BuscaPrestadoresServicoState extends State<BuscaPrestadoresServico> {
     List<Widget> prestadoresDeServico = [];
 
     for (int i = 0; i < 10; i++) {
-      Widget x = Container(
-        margin: const EdgeInsets.only(top: 10),
-        child: Row(
-          children: [
-            Container(
-              width: 220,
-              height: 100,
-              color: Colors.grey.shade200,
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Container(
-                      margin: const EdgeInsets.only(left: 10),
-                      child: const Text(
-                        "Fulano de Tal",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 20),
+      Widget x = InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => SolicitarServico()),
+          );
+        },
+        child: Container(
+          margin: const EdgeInsets.only(top: 10),
+          child: Row(
+            children: [
+              Container(
+                width: 220,
+                height: 100,
+                color: Colors.grey.shade200,
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.only(left: 10),
+                        child: const Text(
+                          "Fulano de Tal",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 20),
+                        ),
                       ),
-                    ),
-                    Container(
-                      margin: const EdgeInsets.only(left: 5),
-                      width: 120,
-                      child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(children: const [
-                              Icon(
-                                Icons.star,
-                                color: Colors.amber,
-                              ),
-                              Text("4.7")
+                      Container(
+                        margin: const EdgeInsets.only(left: 5),
+                        width: 120,
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(children: const [
+                                Icon(
+                                  Icons.star,
+                                  color: Colors.amber,
+                                ),
+                                Text("4.7")
+                              ]),
+                              Row(children: [
+                                Icon(
+                                  Icons.location_pin,
+                                  color: Colors.red.shade700,
+                                ),
+                                Text("2.3 km")
+                              ])
                             ]),
-                            Row(children: [
-                              Icon(
-                                Icons.location_pin,
-                                color: Colors.red.shade700,
-                              ),
-                              Text("2.3 km")
-                            ])
-                          ]),
-                    ),
-                    Container(
-                      margin: const EdgeInsets.only(left: 10),
-                      child: const Text("Online recente"),
-                    )
-                  ]),
-            ),
-            Expanded(
-                child: Image.asset(
-              "imagens/pampa1.jpg",
-              fit: BoxFit.cover,
-            )),
-          ],
+                      ),
+                      Container(
+                        margin: const EdgeInsets.only(left: 10),
+                        child: const Text("Online recente"),
+                      )
+                    ]),
+              ),
+              Expanded(
+                  child: Image.asset(
+                "imagens/pampa1.jpg",
+                fit: BoxFit.cover,
+              )),
+            ],
+          ),
         ),
       );
 
