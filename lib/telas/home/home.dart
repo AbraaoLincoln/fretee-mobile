@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fretee_mobile/telas/home/fragmentos/buscar_fragmento.dart';
 import 'package:fretee_mobile/telas/home/fragmentos/fretes_agenda_fragmento.dart';
+import 'package:fretee_mobile/telas/home/fragmentos/perfil_fragmento.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -59,7 +60,12 @@ class _HomeState extends State<Home> {
           child: const Icon(Icons.notifications, color: Colors.white),
         ),
         InkWell(
-          onTap: () {},
+          onTap: () {
+            setState(() {
+              _activePage = const PerfilFragmento();
+              _activePageTitle = "Perfil";
+            });
+          },
           child: const Icon(Icons.person_sharp, color: Colors.white),
         )
       ]),
