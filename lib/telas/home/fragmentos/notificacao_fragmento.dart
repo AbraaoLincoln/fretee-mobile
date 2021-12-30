@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fretee_mobile/telas/solicitar_servico_info_preco.dart';
 
 class NotificacaoFragmento extends StatefulWidget {
   const NotificacaoFragmento({Key? key}) : super(key: key);
@@ -16,10 +17,11 @@ class _NotificacaoFragmentoState extends State<NotificacaoFragmento> {
           children: [
             _construirNotificacao(
                 "Solicitação De Serviço", Icons.email, Colors.black, () {
-              //   Navigator.push(
-              //   context,
-              //   MaterialPageRoute(builder: (context) => const CadastroUsuario()),
-              // );
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const SolicitarServicoPreco()),
+              );
             }),
             _construirNotificacao("O frete foi marcado", Icons.check_circle,
                 Colors.green.shade500, () {

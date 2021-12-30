@@ -64,7 +64,7 @@ class _CadastroUsuarioState extends State<CadastroUsuario> {
             ),
           ),
           Container(
-            padding: EdgeInsets.only(right: 10),
+            padding: const EdgeInsets.only(right: 10),
             width: 250,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -72,7 +72,7 @@ class _CadastroUsuarioState extends State<CadastroUsuario> {
               children: [
                 TextButton(
                     onPressed: selecionarImagemDaGaleria,
-                    child: Text("Selecionar Imagem"),
+                    child: const Text("Selecionar Imagem"),
                     style: TextButton.styleFrom(
                         backgroundColor: Colors.black,
                         primary: Colors.white,
@@ -80,8 +80,8 @@ class _CadastroUsuarioState extends State<CadastroUsuario> {
                           borderRadius: BorderRadius.circular(50),
                         ),
                         // elevation: 15.0,
-                        minimumSize: Size(100, 10))),
-                Text(
+                        minimumSize: const Size(100, 10))),
+                const Text(
                   "Escolha uma imagem que seu rosto esteja visivel.",
                   style: TextStyle(fontSize: 10),
                   textAlign: TextAlign.center,
