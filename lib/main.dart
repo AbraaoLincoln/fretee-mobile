@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:fretee_mobile/telas/busca.dart';
+import 'package:fretee_mobile/telas/home/home.dart';
 import './telas/login.dart';
 
 void main() {
   Widget home;
-  bool usuarioAutenticado = true;
+  bool usuarioAutenticado = false;
 
   if (usuarioAutenticado) {
-    home = BuscaPrestadoresServico();
+    home = Home();
   } else {
     home = Login();
   }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fretee_mobile/telas/busca.dart';
+import 'package:fretee_mobile/telas/home/home.dart';
 import './cadastro_usuario.dart';
 
 class Login extends StatefulWidget {
@@ -16,31 +16,31 @@ class _LoginState extends State<Login> {
         body: SingleChildScrollView(
             child: Container(
       height: 700,
-      padding: EdgeInsets.fromLTRB(10, 20, 10, 0),
+      padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
       color: Colors.black,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Container(
-            margin: EdgeInsets.only(top: 20),
-            padding: EdgeInsets.only(left: 10),
-            child: Text(
+            margin: const EdgeInsets.only(top: 20),
+            padding: const EdgeInsets.only(left: 10),
+            child: const Text(
               "Fretee",
               style: TextStyle(color: Colors.white, fontSize: 25),
               textAlign: TextAlign.left,
             ),
           ),
           Container(
-            margin: EdgeInsets.only(top: 20),
-            padding: EdgeInsets.only(left: 10, right: 10),
+            margin: const EdgeInsets.only(top: 20),
+            padding: const EdgeInsets.only(left: 10, right: 10),
             child: _textoSaudacao(),
           ),
           Container(
-            margin: EdgeInsets.only(top: 20),
+            margin: const EdgeInsets.only(top: 20),
             child: TextField(
                 decoration: InputDecoration(
-                    labelText: "Nome de Usuário",
-                    labelStyle: TextStyle(
+                    hintText: "Nome de Usuário",
+                    hintStyle: const TextStyle(
                         color: Colors.black45, fontWeight: FontWeight.bold),
                     fillColor: Colors.white,
                     filled: true,
@@ -48,11 +48,11 @@ class _LoginState extends State<Login> {
                         borderRadius: BorderRadius.circular(50.0)))),
           ),
           Container(
-            margin: EdgeInsets.only(top: 20),
+            margin: const EdgeInsets.only(top: 20),
             child: TextField(
               decoration: InputDecoration(
-                  labelText: "Senha",
-                  labelStyle: TextStyle(
+                  hintText: "Senha",
+                  hintStyle: const TextStyle(
                       color: Colors.black45, fontWeight: FontWeight.bold),
                   fillColor: Colors.white,
                   filled: true,
@@ -65,17 +65,18 @@ class _LoginState extends State<Login> {
             ),
           ),
           Container(
-            margin: EdgeInsets.only(top: 20),
+            margin: const EdgeInsets.only(top: 20),
             height: 55,
             child: TextButton(
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => BuscaPrestadoresServico()),
-                );
+                Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const Home(),
+                    ),
+                    (route) => false);
               },
-              child: Text("Entrar", style: TextStyle(fontSize: 20)),
+              child: const Text("Entrar", style: TextStyle(fontSize: 20)),
               style: ButtonStyle(
                   foregroundColor:
                       MaterialStateProperty.all<Color>(Colors.white),
@@ -88,16 +89,18 @@ class _LoginState extends State<Login> {
             ),
           ),
           Container(
-            margin: EdgeInsets.only(top: 20),
+            margin: const EdgeInsets.only(top: 20),
             height: 55,
             child: TextButton(
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => CadastroUsuario()),
+                    MaterialPageRoute(
+                        builder: (context) => const CadastroUsuario()),
                   );
                 },
-                child: Text("Cadastra-se", style: TextStyle(fontSize: 20)),
+                child:
+                    const Text("Cadastra-se", style: TextStyle(fontSize: 20)),
                 style: ButtonStyle(
                     foregroundColor:
                         MaterialStateProperty.all<Color>(Colors.white),
@@ -109,8 +112,8 @@ class _LoginState extends State<Login> {
                     )))),
           ),
           Container(
-            margin: EdgeInsets.only(top: 20),
-            child: Text(
+            margin: const EdgeInsets.only(top: 20),
+            child: const Text(
               "Opa, esqueci a senha",
               style: TextStyle(color: Colors.white, fontSize: 15),
               textAlign: TextAlign.center,

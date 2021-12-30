@@ -3,38 +3,32 @@ import 'package:fretee_mobile/telas/solicita_servico.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 
-class BuscaPrestadoresServico extends StatefulWidget {
-  const BuscaPrestadoresServico({Key? key}) : super(key: key);
+class BuscaPrestadoresServicoFragmento extends StatefulWidget {
+  const BuscaPrestadoresServicoFragmento({Key? key}) : super(key: key);
 
   @override
-  _BuscaPrestadoresServicoState createState() =>
-      _BuscaPrestadoresServicoState();
+  _BuscaPrestadoresServicoFragmentoState createState() =>
+      _BuscaPrestadoresServicoFragmentoState();
 }
 
-class _BuscaPrestadoresServicoState extends State<BuscaPrestadoresServico> {
+class _BuscaPrestadoresServicoFragmentoState
+    extends State<BuscaPrestadoresServicoFragmento> {
   late List<Widget> _prestadoresDeServico;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Busca"),
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
-      ),
-      body: Column(
-        children: [
-          _ConstruirFormOrigemDestino(),
-          Container(
-            margin: const EdgeInsets.only(top: 20),
-            child: const Text(
-              "Resultado",
-              style: TextStyle(fontSize: 20),
-            ),
+    return Column(
+      children: [
+        _ConstruirFormOrigemDestino(),
+        Container(
+          margin: const EdgeInsets.only(top: 20),
+          child: const Text(
+            "Resultado",
+            style: TextStyle(fontSize: 20),
           ),
-          _construirListaDePrestadoresDeServicoProximos()
-        ],
-      ),
+        ),
+        _construirListaDePrestadoresDeServicoProximos()
+      ],
     );
   }
 

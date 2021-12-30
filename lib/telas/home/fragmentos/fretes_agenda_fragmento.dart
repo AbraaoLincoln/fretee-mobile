@@ -1,21 +1,14 @@
 import 'package:flutter/material.dart';
 //import 'package:http/http.dart' as http;
 
-class FretesAgendados extends StatelessWidget {
-  const FretesAgendados({Key? key}) : super(key: key);
+class FretesAgendadosFragmento extends StatelessWidget {
+  const FretesAgendadosFragmento({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Fretes Agendados"),
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(10),
-        child: _construirListaDeFretesAgendeados(),
-      ),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(10),
+      child: _construirListaDeFretesAgendeados(),
     );
   }
 
@@ -106,6 +99,8 @@ class FretesAgendados extends StatelessWidget {
   List<Widget> _proximoFretes() {
     List<Widget> freetsAgendados = [];
 
+    freetsAgendados.add(_proximoFreteNormal());
+    freetsAgendados.add(_proximoFreteNormal());
     freetsAgendados.add(_proximoFreteNormal());
     freetsAgendados.add(_proximoFreteNormal());
 
