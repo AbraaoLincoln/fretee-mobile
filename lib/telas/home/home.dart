@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fretee_mobile/telas/home/fragmentos/buscar_fragmento.dart';
 import 'package:fretee_mobile/telas/home/fragmentos/fretes_agenda_fragmento.dart';
+import 'package:fretee_mobile/telas/home/fragmentos/notificacao_fragmento.dart';
 import 'package:fretee_mobile/telas/home/fragmentos/perfil_fragmento.dart';
 
 class Home extends StatefulWidget {
@@ -56,7 +57,12 @@ class _HomeState extends State<Home> {
           child: const Icon(Icons.calendar_today, color: Colors.white),
         ),
         InkWell(
-          onTap: () {},
+          onTap: () {
+            setState(() {
+              _activePage = const NotificacaoFragmento();
+              _activePageTitle = "Notificações";
+            });
+          },
           child: const Icon(Icons.notifications, color: Colors.white),
         ),
         InkWell(
