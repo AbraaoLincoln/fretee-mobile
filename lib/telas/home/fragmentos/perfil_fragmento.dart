@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fretee_mobile/telas/cadastro_prestador_servico.dart';
 import 'package:fretee_mobile/telas/cadastro_usuario.dart';
+import 'package:fretee_mobile/telas/comun/fretee_api.dart';
 import 'package:fretee_mobile/telas/login.dart';
 
 class PerfilFragmento extends StatefulWidget {
@@ -179,6 +180,9 @@ class _PerfilFragmentoState extends State<PerfilFragmento> {
           );
         }, 145, 10),
         _ContruirItemMenu("Sair do App", "Sair", Icons.logout, () {
+          FreteeApi.accessToken = "";
+          FreteeApi.refreshToken = "";
+
           Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(
