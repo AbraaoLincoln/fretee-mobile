@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fretee_mobile/telas/comun/device_location.dart';
+import 'package:fretee_mobile/telas/comun/usuario.dart';
 import 'package:fretee_mobile/telas/home/fragmentos/buscar_fragmento.dart';
 import 'package:fretee_mobile/telas/home/fragmentos/fretes_agenda_fragmento.dart';
 import 'package:fretee_mobile/telas/home/fragmentos/notificacao_fragmento.dart';

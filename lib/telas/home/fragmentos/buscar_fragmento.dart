@@ -1,7 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:fretee_mobile/telas/comun/device_location.dart';
+import 'package:fretee_mobile/telas/comun/fretee_api.dart';
+import 'package:fretee_mobile/telas/comun/usuario.dart';
 import 'package:fretee_mobile/telas/solicita_servico.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:location/location.dart';
 
 class BuscaPrestadoresServicoFragmento extends StatefulWidget {
   const BuscaPrestadoresServicoFragmento({Key? key}) : super(key: key);
@@ -21,7 +27,7 @@ class _BuscaPrestadoresServicoFragmentoState
       children: [
         _ConstruirFormOrigemDestino(),
         Container(
-          margin: const EdgeInsets.only(top: 20),
+          margin: const EdgeInsets.only(top: 20, bottom: 10),
           child: const Text(
             "Resultado",
             style: TextStyle(fontSize: 20),
@@ -135,15 +141,33 @@ class _BuscaPrestadoresServicoFragmentoState
   }
 
   Future<void> _getResource() async {
-    await Future.delayed(const Duration(seconds: 2));
+    await _getDeviceLocation();
 
-    _prestadoresDeServico = _construirCardResultado();
+    if (!Usuario.usuarioLogado!.location.gpsEnable) {
+      _prestadoresDeServico = [];
+      _prestadoresDeServico.add(const Center(
+        child: Text("O Gps não está ativado"),
+      ));
+      return;
+    }
+
+    if (!Usuario.usuarioLogado!.location.permissionGranted) {
+      _prestadoresDeServico = [];
+      _prestadoresDeServico.add(const Center(
+        child: Text("O app não tem permissão de usar o gps do dispositivo."),
+      ));
+      return;
+    }
+
+    _prestadoresDeServico =
+        _construirCardResultado(await _buscarPrestadoresDeServicoProximos());
   }
 
-  List<Widget> _construirCardResultado() {
+  List<Widget> _construirCardResultado(
+      List<dynamic> prestadoresDeServicoProximos) {
     List<Widget> prestadoresDeServico = [];
 
-    for (int i = 0; i < 10; i++) {
+    for (var prestadorServico in prestadoresDeServicoProximos) {
       Widget x = InkWell(
         onTap: () {
           Navigator.push(
@@ -165,31 +189,33 @@ class _BuscaPrestadoresServicoFragmentoState
                     children: [
                       Container(
                         margin: const EdgeInsets.only(left: 10),
-                        child: const Text(
-                          "Fulano de Tal",
-                          style: TextStyle(
+                        child: Text(
+                          prestadorServico["nomeCompleto"]!,
+                          style: const TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 20),
                         ),
                       ),
                       Container(
                         margin: const EdgeInsets.only(left: 5),
-                        width: 120,
+                        width: 140,
                         child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Row(children: const [
-                                Icon(
+                              Row(children: [
+                                const Icon(
                                   Icons.star,
                                   color: Colors.amber,
                                 ),
-                                Text("4.7")
+                                Text(prestadorServico["reputacao"]! == 0
+                                    ? "Novo"
+                                    : prestadorServico["reputacao"]!.toString())
                               ]),
                               Row(children: [
                                 Icon(
                                   Icons.location_pin,
                                   color: Colors.red.shade700,
                                 ),
-                                Text("2.3 km")
+                                Text("${prestadorServico["distancia"]!} km")
                               ])
                             ]),
                       ),
@@ -199,11 +225,22 @@ class _BuscaPrestadoresServicoFragmentoState
                       )
                     ]),
               ),
+              // Expanded(
+              //     child: Image.asset(
+              //   "imagens/pampa1.jpg",
+              //   fit: BoxFit.cover,
+              // )),
               Expanded(
-                  child: Image.asset(
-                "imagens/pampa1.jpg",
-                fit: BoxFit.cover,
-              )),
+                child: SizedBox(
+                  height: 100,
+                  child: Image.network(
+                    FreteeApi.getUriPrestadoresServicoFotoVeiculo(
+                        prestadorServico["nomeUsuario"]),
+                    headers: {"Authorization": FreteeApi.getaccessToken()},
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              )
             ],
           ),
         ),
@@ -219,11 +256,61 @@ class _BuscaPrestadoresServicoFragmentoState
     return _prestadoresDeServico[index];
   }
 
+  Future<List<dynamic>> _buscarPrestadoresDeServicoProximos() async {
+    var response =
+        await http.get(FreteeApi.getUriPrestadoresServicoProximo(), headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Authorization": FreteeApi.getaccessToken()
+    });
+
+    switch (response.statusCode) {
+      case 200:
+        var prestadoresServico = await json.decode(response.body);
+        return prestadoresServico;
+        break;
+      case 403:
+        print("forddiden");
+        break;
+    }
+
+    return [];
+  }
+
   Future<Null> _refresh() async {
     await Future.delayed(Duration(seconds: 1));
 
     setState(() {});
 
     return null;
+  }
+
+  Future<void> _getDeviceLocation() async {
+    Location location = Location();
+
+    bool _serviceEnabled;
+    PermissionStatus _permissionGranted;
+    LocationData _locationData;
+
+    _serviceEnabled = await location.serviceEnabled();
+    if (!_serviceEnabled) {
+      _serviceEnabled = await location.requestService();
+      if (!_serviceEnabled) {
+        Usuario.usuarioLogado!.location = DeviceLocation.gpsEnable(false);
+      }
+    }
+
+    _permissionGranted = await location.hasPermission();
+    if (_permissionGranted == PermissionStatus.denied) {
+      _permissionGranted = await location.requestPermission();
+      if (_permissionGranted != PermissionStatus.granted) {
+        Usuario.usuarioLogado!.location =
+            DeviceLocation.permissionGranted(false);
+      }
+    }
+
+    _locationData = await location.getLocation();
+
+    Usuario.usuarioLogado!.location =
+        DeviceLocation(_locationData.latitude, _locationData.longitude);
   }
 }

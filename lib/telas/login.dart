@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:fretee_mobile/telas/comun/fretee_api.dart';
+import 'package:fretee_mobile/telas/comun/usuario.dart';
 import 'package:http/http.dart' as http;
 import 'package:fretee_mobile/telas/home/home.dart';
 import './cadastro_usuario.dart';
@@ -194,6 +195,7 @@ class _LoginState extends State<Login> {
         var jsonBody = json.decode(response.body);
         FreteeApi.accessToken = jsonBody["access_token"];
         FreteeApi.refreshToken = jsonBody["refresh_token"];
+        Usuario.usuarioLogado = Usuario(_nomeUsuarioController.text);
         break;
       case 403:
         return false;
