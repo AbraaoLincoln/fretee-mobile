@@ -1,4 +1,8 @@
+import 'dart:convert';
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:fretee_mobile/telas/cadastro_prestador_servico.dart';
 import 'package:fretee_mobile/telas/cadastro_usuario.dart';
 import 'package:fretee_mobile/telas/comun/fretee_api.dart';
@@ -12,6 +16,8 @@ class PerfilFragmento extends StatefulWidget {
 }
 
 class _PerfilFragmentoState extends State<PerfilFragmento> {
+  late Map<String, dynamic> _userInfo;
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -36,9 +42,7 @@ class _PerfilFragmentoState extends State<PerfilFragmento> {
               offset: const Offset(0, 1), // changes position of shadow
             ),
           ]),
-      child: Column(
-        children: [_getUsuario(), _maisInfoUsuario()],
-      ),
+      child: _construirUsuarioInfoWhenReady(),
     );
   }
 
@@ -47,15 +51,16 @@ class _PerfilFragmentoState extends State<PerfilFragmento> {
       children: [
         ClipRRect(
             borderRadius: BorderRadius.circular(50),
-            child: Image.asset(
-              "imagens/user_female.png",
+            child: Image.network(
+              FreteeApi.getUriUsuarioFoto(),
+              headers: {"Authorization": FreteeApi.getAccessToken()},
               fit: BoxFit.cover,
               width: 100,
               height: 100,
             )),
-        const Text(
-          "Cicrana Tals da Silva",
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+        Text(
+          _userInfo["nomeCompleto"]!,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
           textAlign: TextAlign.center,
         )
       ],
@@ -63,27 +68,27 @@ class _PerfilFragmentoState extends State<PerfilFragmento> {
   }
 
   Widget _maisInfoUsuario() {
-    double reputacao = 4.1;
-    String usuarioDesde = "99/99/999";
-    int fretes = 13;
-
     return Container(
       margin: const EdgeInsets.only(top: 10),
       child: Row(
         //mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _contruirUsuarioInfo(
-              "Reputacao", reputacao.toString(), Icons.star, Colors.amber, 3),
-          _contruirUsuarioInfo("Usa o app desde", usuarioDesde,
+          _contruirMaisInfoUsuario("Reputacao",
+              _userInfo["reputacao"].toString(), Icons.star, Colors.amber, 3),
+          _contruirMaisInfoUsuario("Usa o app desde", _userInfo["dataCriacao"]!,
               Icons.calendar_today_rounded, Colors.black, 20),
-          _contruirUsuarioInfo("Fretes", fretes.toString(),
-              Icons.library_add_check_sharp, Colors.green.shade900, 30)
+          _contruirMaisInfoUsuario(
+              "Fretes",
+              _userInfo["fretesRealizados"]!.toString(),
+              Icons.library_add_check_sharp,
+              Colors.green.shade900,
+              30)
         ],
       ),
     );
   }
 
-  Widget _contruirUsuarioInfo(String label, String valor, IconData icon,
+  Widget _contruirMaisInfoUsuario(String label, String valor, IconData icon,
       Color iconColor, double padding) {
     return Container(
       padding: EdgeInsets.only(left: padding),
@@ -235,5 +240,51 @@ class _PerfilFragmentoState extends State<PerfilFragmento> {
         ],
       ),
     );
+  }
+
+  FutureBuilder<void> _construirUsuarioInfoWhenReady() {
+    return FutureBuilder<void>(
+        builder: (context, snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.none:
+            case ConnectionState.waiting:
+              return const SizedBox(
+                  height: 180,
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      semanticsLabel: 'Linear progress indicator',
+                    ),
+                  ));
+            default:
+              if (snapshot.hasError) {
+                return const Center(
+                  child: Text(
+                    "Erro ao carregar informações do usuario",
+                    style: TextStyle(color: Colors.black, fontSize: 25),
+                    textAlign: TextAlign.center,
+                  ),
+                );
+              } else {
+                return Column(
+                  children: [_getUsuario(), _maisInfoUsuario()],
+                );
+              }
+          }
+        },
+        future: _getUsuarioInfo());
+  }
+
+  Future<void> _getUsuarioInfo() async {
+    var response = await http.get(FreteeApi.getUriUsuarioInfo(),
+        headers: {"Authorization": FreteeApi.getAccessToken()});
+
+    switch (response.statusCode) {
+      case 200:
+        _userInfo = await json.decode(response.body);
+        break;
+      case 403:
+        log("foddiden");
+        break;
+    }
   }
 }

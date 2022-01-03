@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:fretee_mobile/telas/comun/device_location.dart';
@@ -236,7 +237,7 @@ class _BuscaPrestadoresServicoFragmentoState
                   child: Image.network(
                     FreteeApi.getUriPrestadoresServicoFotoVeiculo(
                         prestadorServico["nomeUsuario"]),
-                    headers: {"Authorization": FreteeApi.getaccessToken()},
+                    headers: {"Authorization": FreteeApi.getAccessToken()},
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -260,28 +261,25 @@ class _BuscaPrestadoresServicoFragmentoState
     var response =
         await http.get(FreteeApi.getUriPrestadoresServicoProximo(), headers: {
       "Content-Type": "application/x-www-form-urlencoded",
-      "Authorization": FreteeApi.getaccessToken()
+      "Authorization": FreteeApi.getAccessToken()
     });
 
     switch (response.statusCode) {
       case 200:
         var prestadoresServico = await json.decode(response.body);
         return prestadoresServico;
-        break;
       case 403:
-        print("forddiden");
+        log("forddiden");
         break;
     }
 
     return [];
   }
 
-  Future<Null> _refresh() async {
-    await Future.delayed(Duration(seconds: 1));
+  Future<void> _refresh() async {
+    await Future.delayed(const Duration(seconds: 1));
 
     setState(() {});
-
-    return null;
   }
 
   Future<void> _getDeviceLocation() async {

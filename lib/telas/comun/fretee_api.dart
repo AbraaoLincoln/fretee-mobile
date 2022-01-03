@@ -1,13 +1,16 @@
 class FreteeApi {
-  static String url = "http://192.168.0.243:8080/api";
-  static String loginUrn = "/autenticacao/login";
-  static String cadastroUsuarioUrn = "/usuario";
-  static String prestadoresServicoProximoUrn = "/prestador-servico/proximos";
-  static String prestadoresServicoFotoVeiculoUrn =
+  static const String url = "http://192.168.0.243:8080/api";
+  static const String loginUrn = "/autenticacao/login";
+  static const String cadastroUsuarioUrn = "/usuario";
+  static const String prestadoresServicoProximoUrn =
+      "/prestador-servico/proximos";
+  static const String prestadoresServicoFotoVeiculoUrn =
       "/prestador-servico/veiculo/foto";
+  static const String usuarioFotoUrn = "/usuario/foto";
+  static const String usuarioInfoUrn = "/usuario/info";
   static String accessToken = "";
   static String refreshToken = "";
-  static String bearer = "Bearer ";
+  static const String bearer = "Bearer ";
 
   static Uri getLoginUri() {
     return Uri.parse(url + loginUrn);
@@ -21,7 +24,7 @@ class FreteeApi {
     return Uri.parse(url + prestadoresServicoProximoUrn);
   }
 
-  static String getaccessToken() {
+  static String getAccessToken() {
     return bearer + accessToken;
   }
 
@@ -31,5 +34,13 @@ class FreteeApi {
         "/prestador-servico/" +
         nomeUsuarioPrestadorServico +
         "/veiculo/foto";
+  }
+
+  static Uri getUriUsuarioInfo() {
+    return Uri.parse(url + usuarioInfoUrn);
+  }
+
+  static String getUriUsuarioFoto() {
+    return url + usuarioFotoUrn;
   }
 }
