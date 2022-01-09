@@ -4,11 +4,11 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:fretee_mobile/telas/comun/device_location.dart';
 import 'package:fretee_mobile/telas/comun/fretee_api.dart';
+import 'package:fretee_mobile/telas/comun/http_utils.dart';
 import 'package:fretee_mobile/telas/comun/usuario.dart';
 import 'package:fretee_mobile/telas/solicita_servico.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
-import 'package:location/location.dart';
 
 class BuscaPrestadoresServicoFragmento extends StatefulWidget {
   const BuscaPrestadoresServicoFragmento({Key? key}) : super(key: key);
@@ -142,9 +142,9 @@ class _BuscaPrestadoresServicoFragmentoState
   }
 
   Future<void> _getResource() async {
-    await _getDeviceLocation();
+    await DeviceLocation.getLocation();
 
-    if (!Usuario.usuarioLogado!.location.gpsEnable) {
+    if (!Usuario.logado.location.gpsEnable) {
       _prestadoresDeServico = [];
       _prestadoresDeServico.add(const Center(
         child: Text("O Gps não está ativado"),
@@ -152,7 +152,7 @@ class _BuscaPrestadoresServicoFragmentoState
       return;
     }
 
-    if (!Usuario.usuarioLogado!.location.permissionGranted) {
+    if (!Usuario.logado.location.permissionGranted) {
       _prestadoresDeServico = [];
       _prestadoresDeServico.add(const Center(
         child: Text("O app não tem permissão de usar o gps do dispositivo."),
@@ -169,11 +169,11 @@ class _BuscaPrestadoresServicoFragmentoState
     List<Widget> prestadoresDeServico = [];
 
     for (var prestadorServico in prestadoresDeServicoProximos) {
-      Widget x = InkWell(
+      Widget prestadoreDeServico = InkWell(
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => SolicitarServico()),
+            MaterialPageRoute(builder: (context) => const SolicitarServico()),
           );
         },
         child: Container(
@@ -237,7 +237,10 @@ class _BuscaPrestadoresServicoFragmentoState
                   child: Image.network(
                     FreteeApi.getUriPrestadoresServicoFotoVeiculo(
                         prestadorServico["nomeUsuario"]),
-                    headers: {"Authorization": FreteeApi.getAccessToken()},
+                    headers: {
+                      HttpHeaders.authorizationHeader:
+                          FreteeApi.getAccessToken()
+                    },
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -247,7 +250,7 @@ class _BuscaPrestadoresServicoFragmentoState
         ),
       );
 
-      prestadoresDeServico.add(x);
+      prestadoresDeServico.add(prestadoreDeServico);
     }
 
     return prestadoresDeServico;
@@ -260,16 +263,16 @@ class _BuscaPrestadoresServicoFragmentoState
   Future<List<dynamic>> _buscarPrestadoresDeServicoProximos() async {
     var response =
         await http.get(FreteeApi.getUriPrestadoresServicoProximo(), headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      "Authorization": FreteeApi.getAccessToken()
+      HttpHeaders.contentTypeHeader: HttpMediaType.FORM_URLENCODED,
+      HttpHeaders.authorizationHeader: FreteeApi.getAccessToken()
     });
 
     switch (response.statusCode) {
-      case 200:
+      case HttpStatus.ok:
         var prestadoresServico = await json.decode(response.body);
         return prestadoresServico;
-      case 403:
-        log("forddiden");
+      case HttpStatus.forbidden:
+        log("FORBIDDEN...");
         break;
     }
 
@@ -280,35 +283,5 @@ class _BuscaPrestadoresServicoFragmentoState
     await Future.delayed(const Duration(seconds: 1));
 
     setState(() {});
-  }
-
-  Future<void> _getDeviceLocation() async {
-    Location location = Location();
-
-    bool _serviceEnabled;
-    PermissionStatus _permissionGranted;
-    LocationData _locationData;
-
-    _serviceEnabled = await location.serviceEnabled();
-    if (!_serviceEnabled) {
-      _serviceEnabled = await location.requestService();
-      if (!_serviceEnabled) {
-        Usuario.usuarioLogado!.location = DeviceLocation.gpsEnable(false);
-      }
-    }
-
-    _permissionGranted = await location.hasPermission();
-    if (_permissionGranted == PermissionStatus.denied) {
-      _permissionGranted = await location.requestPermission();
-      if (_permissionGranted != PermissionStatus.granted) {
-        Usuario.usuarioLogado!.location =
-            DeviceLocation.permissionGranted(false);
-      }
-    }
-
-    _locationData = await location.getLocation();
-
-    Usuario.usuarioLogado!.location =
-        DeviceLocation(_locationData.latitude, _locationData.longitude);
   }
 }

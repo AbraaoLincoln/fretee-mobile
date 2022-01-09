@@ -1,11 +1,14 @@
 import 'dart:convert';
+import 'dart:developer';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:fretee_mobile/telas/comun/fretee_api.dart';
+import 'package:fretee_mobile/telas/comun/http_utils.dart';
 import 'package:fretee_mobile/telas/comun/usuario.dart';
 import 'package:http/http.dart' as http;
 import 'package:fretee_mobile/telas/home/home.dart';
-import './cadastro_usuario.dart';
+import './cadastros/cadastro_usuario.dart';
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -182,7 +185,7 @@ class _LoginState extends State<Login> {
   Future<bool> _login() async {
     var response = await http.post(FreteeApi.getLoginUri(),
         headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
+          HttpHeaders.contentTypeHeader: HttpMediaType.FORM_URLENCODED,
         },
         encoding: Encoding.getByName('utf-8'),
         body: {
@@ -191,15 +194,15 @@ class _LoginState extends State<Login> {
         });
 
     switch (response.statusCode) {
-      case 200:
+      case HttpStatus.ok:
         var jsonBody = json.decode(response.body);
         FreteeApi.accessToken = jsonBody["access_token"];
         FreteeApi.refreshToken = jsonBody["refresh_token"];
-        Usuario.usuarioLogado = Usuario(_nomeUsuarioController.text);
+        Usuario.logado.nomeUsuario = _nomeUsuarioController.text;
         break;
-      case 403:
+      case HttpStatus.forbidden:
+        log("forbidden...");
         return false;
-        break;
     }
 
     return true;

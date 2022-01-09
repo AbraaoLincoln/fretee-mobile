@@ -3,8 +3,8 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:fretee_mobile/telas/cadastro_prestador_servico.dart';
-import 'package:fretee_mobile/telas/cadastro_usuario.dart';
+import 'package:fretee_mobile/telas/cadastros/cadastro_prestador_servico.dart';
+import 'package:fretee_mobile/telas/cadastros/cadastro_usuario.dart';
 import 'package:fretee_mobile/telas/comun/fretee_api.dart';
 import 'package:fretee_mobile/telas/login.dart';
 

@@ -215,7 +215,7 @@ class _CadastroUsuarioState extends State<CadastroUsuario> {
     var response = await request.send();
 
     switch (response.statusCode) {
-      case 400:
+      case HttpStatus.badRequest:
         var error = response.headers["error"];
         setState(() {
           _erroMsg = error;

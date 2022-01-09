@@ -2,6 +2,7 @@ class FreteeApi {
   static const String url = "http://192.168.0.243:8080/api";
   static const String loginUrn = "/autenticacao/login";
   static const String cadastroUsuarioUrn = "/usuario";
+  static const String cadastroPrestadorServicoUrn = "/prestador-servico";
   static const String prestadoresServicoProximoUrn =
       "/prestador-servico/proximos";
   static const String prestadoresServicoFotoVeiculoUrn =
@@ -18,6 +19,10 @@ class FreteeApi {
 
   static Uri getUriCadastrarUsuario() {
     return Uri.parse(url + cadastroUsuarioUrn);
+  }
+
+  static Uri getUriCadastrarPrestadorServico() {
+    return Uri.parse(url + cadastroPrestadorServicoUrn);
   }
 
   static Uri getUriPrestadoresServicoProximo() {
