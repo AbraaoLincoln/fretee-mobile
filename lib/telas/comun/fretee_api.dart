@@ -25,8 +25,9 @@ class FreteeApi {
     return Uri.parse(url + cadastroPrestadorServicoUrn);
   }
 
-  static Uri getUriPrestadoresServicoProximo() {
-    return Uri.parse(url + prestadoresServicoProximoUrn);
+  static Uri getUriPrestadoresServicoProximo(
+      double? latitude, double? longitude) {
+    return Uri.parse("$url$prestadoresServicoProximoUrn/$latitude/$longitude");
   }
 
   static String getAccessToken() {

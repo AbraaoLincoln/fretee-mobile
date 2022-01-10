@@ -191,7 +191,7 @@ class _BuscaPrestadoresServicoFragmentoState
                       Container(
                         margin: const EdgeInsets.only(left: 10),
                         child: Text(
-                          prestadorServico["nomeCompleto"]!,
+                          prestadorServico["nomeCompleto"] ?? "Nome Sobrenome",
                           style: const TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 20),
                         ),
@@ -207,16 +207,20 @@ class _BuscaPrestadoresServicoFragmentoState
                                   Icons.star,
                                   color: Colors.amber,
                                 ),
-                                Text(prestadorServico["reputacao"]! == 0
-                                    ? "Novo"
-                                    : prestadorServico["reputacao"]!.toString())
+                                Text(prestadorServico["reputacao"] != null
+                                    ? (prestadorServico["reputacao"] == 0
+                                        ? "Novo"
+                                        : prestadorServico["reputacao"]
+                                            .toString())
+                                    : "0")
                               ]),
                               Row(children: [
                                 Icon(
                                   Icons.location_pin,
                                   color: Colors.red.shade700,
                                 ),
-                                Text("${prestadorServico["distancia"]!} km")
+                                Text(
+                                    "${prestadorServico["distancia"] ?? "0"} km")
                               ])
                             ]),
                       ),
@@ -261,11 +265,14 @@ class _BuscaPrestadoresServicoFragmentoState
   }
 
   Future<List<dynamic>> _buscarPrestadoresDeServicoProximos() async {
-    var response =
-        await http.get(FreteeApi.getUriPrestadoresServicoProximo(), headers: {
-      HttpHeaders.contentTypeHeader: HttpMediaType.FORM_URLENCODED,
-      HttpHeaders.authorizationHeader: FreteeApi.getAccessToken()
-    });
+    var response = await http.get(
+        FreteeApi.getUriPrestadoresServicoProximo(
+            Usuario.logado.location.latitude,
+            Usuario.logado.location.longitude),
+        headers: {
+          HttpHeaders.contentTypeHeader: HttpMediaType.FORM_URLENCODED,
+          HttpHeaders.authorizationHeader: FreteeApi.getAccessToken()
+        });
 
     switch (response.statusCode) {
       case HttpStatus.ok:

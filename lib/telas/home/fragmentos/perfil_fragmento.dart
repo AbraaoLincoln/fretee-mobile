@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -16,7 +17,7 @@ class PerfilFragmento extends StatefulWidget {
 }
 
 class _PerfilFragmentoState extends State<PerfilFragmento> {
-  late Map<String, dynamic> _userInfo;
+  Map<String, dynamic>? _userInfo;
 
   @override
   Widget build(BuildContext context) {
@@ -53,13 +54,15 @@ class _PerfilFragmentoState extends State<PerfilFragmento> {
             borderRadius: BorderRadius.circular(50),
             child: Image.network(
               FreteeApi.getUriUsuarioFoto(),
-              headers: {"Authorization": FreteeApi.getAccessToken()},
+              headers: {
+                HttpHeaders.authorizationHeader: FreteeApi.getAccessToken()
+              },
               fit: BoxFit.cover,
               width: 100,
               height: 100,
             )),
         Text(
-          _userInfo["nomeCompleto"]!,
+          _userInfo!["nomeCompleto"] ?? "Nome nao informado",
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
           textAlign: TextAlign.center,
         )
@@ -74,12 +77,16 @@ class _PerfilFragmentoState extends State<PerfilFragmento> {
         //mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           _contruirMaisInfoUsuario("Reputacao",
-              _userInfo["reputacao"].toString(), Icons.star, Colors.amber, 3),
-          _contruirMaisInfoUsuario("Usa o app desde", _userInfo["dataCriacao"]!,
-              Icons.calendar_today_rounded, Colors.black, 20),
+              _userInfo!["reputacao"].toString(), Icons.star, Colors.amber, 3),
+          _contruirMaisInfoUsuario(
+              "Usa o app desde",
+              _userInfo!["dataCriacao"] ?? "99/99/9999",
+              Icons.calendar_today_rounded,
+              Colors.black,
+              20),
           _contruirMaisInfoUsuario(
               "Fretes",
-              _userInfo["fretesRealizados"]!.toString(),
+              _userInfo!["fretesRealizados"].toString(),
               Icons.library_add_check_sharp,
               Colors.green.shade900,
               30)
@@ -276,15 +283,29 @@ class _PerfilFragmentoState extends State<PerfilFragmento> {
 
   Future<void> _getUsuarioInfo() async {
     var response = await http.get(FreteeApi.getUriUsuarioInfo(),
-        headers: {"Authorization": FreteeApi.getAccessToken()});
+        headers: {HttpHeaders.authorizationHeader: FreteeApi.getAccessToken()});
 
     switch (response.statusCode) {
-      case 200:
+      case HttpStatus.ok:
         _userInfo = await json.decode(response.body);
         break;
-      case 403:
+      case HttpStatus.forbidden:
         log("foddiden");
+        _userInfo = _getUserInfoPlaceholder();
         break;
+      default:
+        _userInfo = _getUserInfoPlaceholder();
     }
+  }
+
+  Map<String, dynamic> _getUserInfoPlaceholder() {
+    Map<String, dynamic> userInfoTemp = Map();
+
+    userInfoTemp["nomeCompleto"] = "Nome Sobrenome";
+    userInfoTemp["reputacao"] = "0";
+    userInfoTemp["dataCriacao"] = "99/99/9999";
+    userInfoTemp["fretesRealizados"] = "0";
+
+    return userInfoTemp;
   }
 }

@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:fretee_mobile/telas/comun/device_location.dart';
 import 'package:fretee_mobile/telas/comun/fretee_api.dart';
 import 'package:fretee_mobile/telas/comun/usuario.dart';
+import 'package:fretee_mobile/telas/home/home.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 
@@ -317,23 +318,27 @@ class _MyDialogState extends State<MyDialog> {
     setState(() {
       switch (statusCode) {
         case HttpStatus.created:
-          _alertContent = const Text("Usuario cadastro com suscesso");
+          _alertContent = const Text("Cadastro realizado com suscesso");
+          _alertActions.add(TextButton(
+            onPressed: _loadPerfil,
+            child: const Text('OK'),
+          ));
           break;
         case HttpStatus.forbidden:
           log("forbidden");
           break;
         default:
           _alertContent = Text("Erro ${statusCode}");
+          _alertActions.add(TextButton(
+            onPressed: () => Navigator.pop(context, 'OK'),
+            child: const Text('OK'),
+          ));
       }
-
-      _alertActions.add(TextButton(
-        onPressed: () => Navigator.pop(context, 'Cancel'),
-        child: const Text('Cancelar'),
-      ));
-      _alertActions.add(TextButton(
-        onPressed: () => Navigator.pop(context, 'OK'),
-        child: const Text('OK'),
-      ));
     });
+  }
+
+  void _loadPerfil() {
+    Navigator.pop(context);
+    Navigator.pop(context);
   }
 }

@@ -1,8 +1,10 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fretee_mobile/telas/comun/fretee_api.dart';
+import 'package:fretee_mobile/telas/login.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 
@@ -23,6 +25,7 @@ class _CadastroUsuarioState extends State<CadastroUsuario> {
   String _msgFotoNaoSelecionada = "";
   Color _borberColorImagePicker = Colors.grey.shade400;
   GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  late MyDialog _myDialog;
 
   @override
   Widget build(BuildContext context) {
@@ -199,11 +202,12 @@ class _CadastroUsuarioState extends State<CadastroUsuario> {
 
   void _cadastrarUsuario() async {
     if (!validateImageAndForm()) return;
+    _showCadastrandoDialog();
 
     var request =
         http.MultipartRequest("POST", FreteeApi.getUriCadastrarUsuario());
 
-    request.fields["nome"] = _nomeCompletoTextControlle.text;
+    request.fields["nomeCompleto"] = _nomeCompletoTextControlle.text;
     request.fields["telefone"] = _telefoneTextControlle.text;
     request.fields["nomeAutenticacao"] = _nomeUsuarioTextControlle.text;
     request.fields["senha"] = _senhaTextControlle.text;
@@ -215,7 +219,13 @@ class _CadastroUsuarioState extends State<CadastroUsuario> {
     var response = await request.send();
 
     switch (response.statusCode) {
+      case HttpStatus.created:
+        log("Usuario cadastro com suscesso");
+        _myDialog.showRes(response.statusCode);
+        break;
       case HttpStatus.badRequest:
+        log("Opa badrequest");
+        Navigator.pop(context, 'OK');
         var error = response.headers["error"];
         setState(() {
           _erroMsg = error;
@@ -237,5 +247,75 @@ class _CadastroUsuarioState extends State<CadastroUsuario> {
     if (!form!.validate()) return false;
 
     return true;
+  }
+
+  void _showCadastrandoDialog() {
+    _myDialog = MyDialog();
+    showDialog(context: context, builder: (context) => _myDialog);
+  }
+}
+
+class MyDialog extends StatefulWidget {
+  const MyDialog({Key? key}) : super(key: key);
+
+  void showRes(int statusCode) {
+    _MyDialogState.currentDialog.showRespose(statusCode);
+  }
+
+  @override
+  _MyDialogState createState() {
+    _MyDialogState.currentDialog = _MyDialogState();
+    return _MyDialogState.currentDialog;
+  }
+}
+
+class _MyDialogState extends State<MyDialog> {
+  static _MyDialogState currentDialog = _MyDialogState();
+  Widget _alertContent = const SizedBox(
+      height: 200,
+      child: Center(
+        child: CircularProgressIndicator(
+          semanticsLabel: 'Linear progress indicator',
+        ),
+      ));
+  List<Widget> _alertActions = [];
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text("Cadastrando"),
+      content: _alertContent,
+      actions: _alertActions,
+    );
+  }
+
+  void showRespose(int statusCode) {
+    setState(() {
+      switch (statusCode) {
+        case HttpStatus.created:
+          _alertContent = const Text("Cadastro realizado com suscesso");
+          _alertActions.add(TextButton(
+            onPressed: () {
+              Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const Login(),
+                  ),
+                  (route) => false);
+            },
+            child: const Text('OK'),
+          ));
+          break;
+        case HttpStatus.forbidden:
+          log("forbidden");
+          break;
+        default:
+          _alertContent = Text("Erro ${statusCode}");
+          _alertActions.add(TextButton(
+            onPressed: () => Navigator.pop(context, 'OK'),
+            child: const Text('OK'),
+          ));
+      }
+    });
   }
 }
