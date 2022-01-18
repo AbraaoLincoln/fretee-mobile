@@ -1,5 +1,5 @@
 class FreteeApi {
-  static const String url = "http://192.168.0.243:8080/api";
+  static const String url = "http://192.168.0.246:8080/api";
   static const String loginUrn = "/autenticacao/login";
   static const String cadastroUsuarioUrn = "/usuario";
   static const String cadastroPrestadorServicoUrn = "/prestador-servico";

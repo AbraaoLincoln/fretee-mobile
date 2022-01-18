@@ -20,23 +20,47 @@ class BuscaPrestadoresServicoFragmento extends StatefulWidget {
 
 class _BuscaPrestadoresServicoFragmentoState
     extends State<BuscaPrestadoresServicoFragmento> {
-  late List<Widget> _prestadoresDeServico;
+  ErroGps erroGps = ErroGps();
+  late List<dynamic> _prestadoresDeServico;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        _ConstruirFormOrigemDestino(),
+        //_construiiButaoAbrirFormInfoSolicitarServico(),
         Container(
           margin: const EdgeInsets.only(top: 20, bottom: 10),
           child: const Text(
-            "Resultado",
+            "Fretes Próximos",
             style: TextStyle(fontSize: 20),
           ),
         ),
         _construirListaDePrestadoresDeServicoProximos()
       ],
     );
+  }
+
+  Widget _construiiButaoAbrirFormInfoSolicitarServico() {
+    return Container(
+        margin: const EdgeInsets.only(top: 10),
+        child: TextButton(
+            onPressed: () {},
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.info),
+                Container(
+                    margin: const EdgeInsets.only(left: 10),
+                    child: const Text("Informações do Frete"))
+              ],
+            ),
+            style: TextButton.styleFrom(
+                backgroundColor: Colors.black,
+                primary: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                minimumSize: const Size(100, 50))));
   }
 
   Widget _ConstruirFormOrigemDestino() {
@@ -146,22 +170,23 @@ class _BuscaPrestadoresServicoFragmentoState
 
     if (!Usuario.logado.location.gpsEnable) {
       _prestadoresDeServico = [];
-      _prestadoresDeServico.add(const Center(
+      erroGps.hasError = true;
+      erroGps.widgetShowErro = const Center(
         child: Text("O Gps não está ativado"),
-      ));
+      );
       return;
     }
 
     if (!Usuario.logado.location.permissionGranted) {
       _prestadoresDeServico = [];
-      _prestadoresDeServico.add(const Center(
+      erroGps.hasError = true;
+      erroGps.widgetShowErro = const Center(
         child: Text("O app não tem permissão de usar o gps do dispositivo."),
-      ));
+      );
       return;
     }
 
-    _prestadoresDeServico =
-        _construirCardResultado(await _buscarPrestadoresDeServicoProximos());
+    _prestadoresDeServico = await _buscarPrestadoresDeServicoProximos();
   }
 
   List<Widget> _construirCardResultado(
@@ -261,7 +286,105 @@ class _BuscaPrestadoresServicoFragmentoState
   }
 
   Widget _buildItemList(context, index) {
-    return _prestadoresDeServico[index];
+    if (erroGps.hasError) return erroGps.widgetShowErro;
+    var prestadorServico = _prestadoresDeServico[index];
+
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const SolicitarServico()),
+        );
+      },
+      child: Container(
+        height: 200,
+        width: 500,
+        margin: const EdgeInsets.only(bottom: 10),
+        decoration: BoxDecoration(boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.5),
+            spreadRadius: 2,
+            blurRadius: 1,
+            offset: const Offset(0, 1),
+          ),
+        ], borderRadius: BorderRadius.circular(10)),
+        child: Stack(
+          // fit: StackFit.expand,
+          children: [
+            Positioned.fill(
+              child: SizedBox(
+                height: 100,
+                child: Image.network(
+                  FreteeApi.getUriPrestadoresServicoFotoVeiculo(
+                      prestadorServico["nomeUsuario"]),
+                  headers: {
+                    HttpHeaders.authorizationHeader: FreteeApi.getAccessToken()
+                  },
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            Container(
+                padding: const EdgeInsets.only(right: 10, top: 10, bottom: 10),
+                margin: const EdgeInsets.only(left: 5, top: 5),
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 1,
+                        blurRadius: 1,
+                        offset:
+                            const Offset(0, 1), // changes position of shadow
+                      ),
+                    ]),
+                child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.only(left: 10),
+                        child: Text(
+                          prestadorServico["nomeCompleto"] ?? "Nome Sobrenome",
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 15),
+                        ),
+                      ),
+                      Container(
+                        // margin: const EdgeInsets.only(left: 5),
+                        width: 150,
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Row(children: [
+                                const Icon(
+                                  Icons.star,
+                                  color: Colors.amber,
+                                ),
+                                Text(prestadorServico["reputacao"] != null
+                                    ? (prestadorServico["reputacao"] == 0
+                                        ? "Novo"
+                                        : prestadorServico["reputacao"]
+                                            .toString())
+                                    : "0")
+                              ]),
+                              Row(children: [
+                                Icon(
+                                  Icons.location_pin,
+                                  color: Colors.red.shade700,
+                                ),
+                                Text(
+                                    "${prestadorServico["distancia"] ?? "0"} km")
+                              ])
+                            ]),
+                      )
+                    ]))
+          ],
+        ),
+      ),
+    );
   }
 
   Future<List<dynamic>> _buscarPrestadoresDeServicoProximos() async {
@@ -291,4 +414,9 @@ class _BuscaPrestadoresServicoFragmentoState
 
     setState(() {});
   }
+}
+
+class ErroGps {
+  bool hasError = false;
+  Widget widgetShowErro = const Text("Erro Gps");
 }

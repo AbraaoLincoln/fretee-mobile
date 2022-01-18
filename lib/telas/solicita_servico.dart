@@ -1,6 +1,7 @@
 import 'dart:ffi';
 
 import 'package:flutter/material.dart';
+import 'package:fretee_mobile/telas/comun/solicitar_servico_info.dart';
 //import 'dart:io';
 //import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -13,16 +14,31 @@ class SolicitarServico extends StatefulWidget {
 }
 
 class _SolicitarServicoState extends State<SolicitarServico> {
-  late String _nomePrestadorServico = "Guilherme Pedro";
-  late double _reputacaoPrestadorServico = 4.5;
-  late double __distanciaPrestadorServico = 3.2;
-  late double __veiculoComprimento = 1.887;
-  late double __veiculoAltura = 1.339;
-  late double __veiculoLargura = 1.089;
-  late String _origem = "Rua tal, Natal/RN";
-  late String _destino = "Rua ali, Extremoz/RN";
-  TextEditingController _diaController = TextEditingController();
-  TextEditingController _horaController = TextEditingController();
+  final String _nomePrestadorServico = "Guilherme Pedro";
+  final double _reputacaoPrestadorServico = 4.5;
+  final double __distanciaPrestadorServico = 3.2;
+  final double __veiculoComprimento = 1.887;
+  final double __veiculoAltura = 1.339;
+  final double __veiculoLargura = 1.089;
+
+  final TextEditingController _origemController = TextEditingController();
+  final TextEditingController _destinoController = TextEditingController();
+  final TextEditingController _diaController = TextEditingController();
+  final TextEditingController _horaController = TextEditingController();
+  final TextEditingController _descricaoController = TextEditingController();
+  final TextEditingController _precisaAjudanteController =
+      TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    _origemController.text = SolicitarServicoInfo.infoAtual.origem;
+    _destinoController.text = SolicitarServicoInfo.infoAtual.destino;
+    _descricaoController.text = SolicitarServicoInfo.infoAtual.descricaoCarga;
+    _diaController.text = SolicitarServicoInfo.infoAtual.dia;
+    _horaController.text = SolicitarServicoInfo.infoAtual.hora;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -162,16 +178,18 @@ class _SolicitarServicoState extends State<SolicitarServico> {
     return Container(
         padding: const EdgeInsets.all(10),
         margin: const EdgeInsets.only(top: 20),
-        child: Column(
+        child: Form(
+            child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _construirTextInfoServico("Origem", _origem, Icons.location_pin, 1),
+            _construirTextInfoServico(
+                "Origem", Icons.location_pin, 1, _origemController),
             Divider(
               height: 20,
               color: Colors.grey.shade600,
             ),
             _construirTextInfoServico(
-                "Destino", _destino, Icons.location_pin, 1),
+                "Destino", Icons.location_pin, 1, _destinoController),
             Divider(
               height: 20,
               color: Colors.grey.shade600,
@@ -181,29 +199,29 @@ class _SolicitarServicoState extends State<SolicitarServico> {
               height: 20,
               color: Colors.grey.shade600,
             ),
-            _construirTextInfoServico(
-                "Descrição da Carga", "", Icons.library_books_sharp, 4),
+            _construirTextInfoServico("Descrição da Carga",
+                Icons.library_books_sharp, 4, _descricaoController),
             Divider(
               height: 20,
               color: Colors.grey.shade600,
             ),
-            _construirTextInfoServico(
-                "Precisa de Ajudante ?", "", Icons.supervised_user_circle, 1)
+            _construirTextInfoServico("Precisa de Ajudante ?",
+                Icons.supervised_user_circle, 1, _precisaAjudanteController)
           ],
-        ),
+        )),
         decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
             border: Border.all(color: Colors.grey.shade400)));
   }
 
-  Widget _construirTextInfoServico(
-      String label, String valor, IconData? icon, int qtdLinhas) {
+  Widget _construirTextInfoServico(String label, IconData? icon, int qtdLinhas,
+      TextEditingController contoller) {
     return Row(
       children: [
         Expanded(
             child: TextFormField(
-                initialValue: valor,
                 maxLines: qtdLinhas,
+                controller: contoller,
                 style: const TextStyle(fontWeight: FontWeight.bold),
                 decoration: InputDecoration(
                     label: RichText(
@@ -230,7 +248,7 @@ class _SolicitarServicoState extends State<SolicitarServico> {
                     context: context,
                     initialDate: DateTime.now(),
                     firstDate: DateTime.now(),
-                    lastDate: DateTime(2022));
+                    lastDate: DateTime(2099));
 
                 if (date != null) {
                   _diaController.text = DateFormat('dd-MM-yyyy').format(date);
@@ -279,7 +297,9 @@ class _SolicitarServicoState extends State<SolicitarServico> {
       height: 55,
       width: 400,
       child: TextButton(
-          onPressed: () {},
+          onPressed: () {
+            _atualizarSolicitarServicoInfo();
+          },
           child:
               const Text("Enviar Solicitação", style: TextStyle(fontSize: 20)),
           style: ButtonStyle(
@@ -290,5 +310,13 @@ class _SolicitarServicoState extends State<SolicitarServico> {
                 borderRadius: BorderRadius.circular(50),
               )))),
     );
+  }
+
+  void _atualizarSolicitarServicoInfo() {
+    SolicitarServicoInfo.infoAtual.origem = _origemController.text;
+    SolicitarServicoInfo.infoAtual.destino = _destinoController.text;
+    SolicitarServicoInfo.infoAtual.descricaoCarga = _descricaoController.text;
+    SolicitarServicoInfo.infoAtual.hora = _horaController.text;
+    SolicitarServicoInfo.infoAtual.dia = _diaController.text;
   }
 }
