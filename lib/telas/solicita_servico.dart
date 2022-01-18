@@ -1,43 +1,34 @@
+import 'dart:developer';
 import 'dart:ffi';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:fretee_mobile/telas/comun/solicitar_servico_info.dart';
-//import 'dart:io';
-//import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
+import 'comun/fretee_api.dart';
+import 'comun/http_utils.dart';
+import 'comun/usuario.dart';
+
 class SolicitarServico extends StatefulWidget {
-  const SolicitarServico({Key? key}) : super(key: key);
+  final dynamic prestadorServico;
+  const SolicitarServico({Key? key, this.prestadorServico}) : super(key: key);
 
   @override
   _SolicitarServicoState createState() => _SolicitarServicoState();
 }
 
 class _SolicitarServicoState extends State<SolicitarServico> {
-  final String _nomePrestadorServico = "Guilherme Pedro";
-  final double _reputacaoPrestadorServico = 4.5;
-  final double __distanciaPrestadorServico = 3.2;
-  final double __veiculoComprimento = 1.887;
-  final double __veiculoAltura = 1.339;
-  final double __veiculoLargura = 1.089;
-
-  final TextEditingController _origemController = TextEditingController();
-  final TextEditingController _destinoController = TextEditingController();
-  final TextEditingController _diaController = TextEditingController();
-  final TextEditingController _horaController = TextEditingController();
-  final TextEditingController _descricaoController = TextEditingController();
-  final TextEditingController _precisaAjudanteController =
-      TextEditingController();
+  dynamic prestadorServico;
+  late Map<String, dynamic> _veiculo;
 
   @override
   void initState() {
     super.initState();
 
-    _origemController.text = SolicitarServicoInfo.infoAtual.origem;
-    _destinoController.text = SolicitarServicoInfo.infoAtual.destino;
-    _descricaoController.text = SolicitarServicoInfo.infoAtual.descricaoCarga;
-    _diaController.text = SolicitarServicoInfo.infoAtual.dia;
-    _horaController.text = SolicitarServicoInfo.infoAtual.hora;
+    prestadorServico = widget.prestadorServico;
   }
 
   @override
@@ -48,18 +39,45 @@ class _SolicitarServicoState extends State<SolicitarServico> {
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(10),
-        child: Column(
-          children: [
-            _construirPrestadorServicoInfo(),
-            _construirVeiculoInfo(),
-            _construirServicoInfo(),
-            _construirButonEnviarSolicitacao()
-          ],
-        ),
-      ),
+      body: _construirListaDePrestadoresDeServicoProximos(),
     );
+  }
+
+  FutureBuilder<void> _construirListaDePrestadoresDeServicoProximos() {
+    return FutureBuilder<void>(
+        builder: (context, snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.none:
+            case ConnectionState.waiting:
+              return const Center(
+                child: CircularProgressIndicator(
+                  semanticsLabel: 'Linear progress indicator',
+                ),
+              );
+            default:
+              if (snapshot.hasError) {
+                return const Center(
+                  child: Text(
+                    "Erro",
+                    style: TextStyle(color: Colors.black, fontSize: 25),
+                    textAlign: TextAlign.center,
+                  ),
+                );
+              } else {
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.all(10),
+                  child: Column(
+                    children: [
+                      _construirPrestadorServicoInfo(),
+                      _construirVeiculoInfo(),
+                      const FormSolicitacaoServico()
+                    ],
+                  ),
+                );
+              }
+          }
+        },
+        future: _getVeiculoInfo());
   }
 
   Widget _construirPrestadorServicoInfo() {
@@ -68,8 +86,12 @@ class _SolicitarServicoState extends State<SolicitarServico> {
       child: Row(children: [
         ClipRRect(
             borderRadius: BorderRadius.circular(10),
-            child: Image.asset(
-              "imagens/user_male.png",
+            child: Image.network(
+              FreteeApi.getUriPrestadoresServicoFoto(
+                  prestadorServico["nomeUsuario"]),
+              headers: {
+                HttpHeaders.authorizationHeader: FreteeApi.getAccessToken()
+              },
               fit: BoxFit.cover,
               width: 100,
               height: 80,
@@ -80,7 +102,7 @@ class _SolicitarServicoState extends State<SolicitarServico> {
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(
-              _nomePrestadorServico,
+              prestadorServico["nomeCompleto"] ?? "Nome Sobrenome",
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
             ),
             Container(
@@ -91,7 +113,11 @@ class _SolicitarServicoState extends State<SolicitarServico> {
                     Icons.star,
                     color: Colors.amber,
                   ),
-                  Text(_reputacaoPrestadorServico.toString())
+                  Text(prestadorServico["reputacao"] != null
+                      ? (prestadorServico["reputacao"] == 0
+                          ? "Novo"
+                          : prestadorServico["reputacao"].toString())
+                      : "0")
                 ]),
                 Container(
                   margin: const EdgeInsets.only(left: 10),
@@ -100,7 +126,7 @@ class _SolicitarServicoState extends State<SolicitarServico> {
                       Icons.location_pin,
                       color: Colors.red.shade700,
                     ),
-                    Text("$__distanciaPrestadorServico km")
+                    Text("${prestadorServico["distancia"] ?? "0"} km")
                   ]),
                 )
               ]),
@@ -117,7 +143,7 @@ class _SolicitarServicoState extends State<SolicitarServico> {
               color: Colors.grey.withOpacity(0.5),
               spreadRadius: 1,
               blurRadius: 1,
-              offset: const Offset(0, 1), // changes position of shadow
+              offset: const Offset(0, 1),
             ),
           ]),
     );
@@ -128,11 +154,18 @@ class _SolicitarServicoState extends State<SolicitarServico> {
       margin: const EdgeInsets.only(top: 20),
       height: 300,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
-              child: Image.asset(
-            "imagens/pampa1.jpg",
-            fit: BoxFit.cover,
+              child: FittedBox(
+            child: Image.network(
+              FreteeApi.getUriPrestadoresServicoFotoVeiculo(
+                  prestadorServico["nomeUsuario"]),
+              headers: {
+                HttpHeaders.authorizationHeader: FreteeApi.getAccessToken()
+              },
+            ),
+            fit: BoxFit.fill,
           )),
           Container(
             margin: const EdgeInsets.only(top: 10, bottom: 10),
@@ -140,10 +173,11 @@ class _SolicitarServicoState extends State<SolicitarServico> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _construirTextInfoVeiculo(
-                    "Comprimento", __veiculoComprimento.toString()),
-                _construirTextInfoVeiculo("Altura", __veiculoAltura.toString()),
+                    "Comprimento", _veiculo["comprimento"].toString()),
                 _construirTextInfoVeiculo(
-                    "Largura", __veiculoLargura.toString())
+                    "Altura", _veiculo["altura"].toString()),
+                _construirTextInfoVeiculo(
+                    "Largura", _veiculo["largura"].toString())
               ],
             ),
           )
@@ -174,44 +208,127 @@ class _SolicitarServicoState extends State<SolicitarServico> {
     );
   }
 
+  Map<String, String> getPrestadorServicoPlaceholder() {
+    Map<String, String> prestadorServico = {};
+    prestadorServico["nome"] = "nome sobrenome";
+    prestadorServico["reputacao"] = "4.5";
+    prestadorServico["nome"] = "3.2";
+    prestadorServico["comprimento"] = "1.887";
+    prestadorServico["altura"] = "1.339";
+    prestadorServico["largura"] = "1.089";
+
+    return prestadorServico;
+  }
+
+  Future<void> _getVeiculoInfo() async {
+    if (prestadorServico["nomeUsuario"] == null) {
+      log("nome usuario is null");
+      return;
+    }
+
+    var response = await http.get(
+        FreteeApi.getUriPrestadoresServicoVeiculoInfo(
+            prestadorServico["nomeUsuario"]),
+        headers: {
+          HttpHeaders.contentTypeHeader: HttpMediaType.FORM_URLENCODED,
+          HttpHeaders.authorizationHeader: FreteeApi.getAccessToken()
+        });
+
+    switch (response.statusCode) {
+      case HttpStatus.ok:
+        var bodyJson = await json.decode(response.body);
+        _veiculo = bodyJson;
+        break;
+      case HttpStatus.badRequest:
+        log("bad request");
+        break;
+      case HttpStatus.forbidden:
+        log("Forbidden");
+        break;
+      default:
+        log(response.statusCode.toString());
+    }
+  }
+}
+
+class FormSolicitacaoServico extends StatefulWidget {
+  const FormSolicitacaoServico({Key? key}) : super(key: key);
+
+  @override
+  _FormSolicitacaoServicoState createState() => _FormSolicitacaoServicoState();
+}
+
+class _FormSolicitacaoServicoState extends State<FormSolicitacaoServico> {
+  final TextEditingController _origemController = TextEditingController();
+  final TextEditingController _destinoController = TextEditingController();
+  final TextEditingController _diaController = TextEditingController();
+  final TextEditingController _horaController = TextEditingController();
+  final TextEditingController _descricaoController = TextEditingController();
+  final TextEditingController _precisaAjudanteController =
+      TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    _origemController.text = SolicitacaoServicoInfo.infoAtual.origem;
+    _destinoController.text = SolicitacaoServicoInfo.infoAtual.destino;
+    _descricaoController.text = SolicitacaoServicoInfo.infoAtual.descricaoCarga;
+    _diaController.text = SolicitacaoServicoInfo.infoAtual.dia;
+    _horaController.text = SolicitacaoServicoInfo.infoAtual.hora;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _construirServicoInfo();
+  }
+
   Widget _construirServicoInfo() {
-    return Container(
-        padding: const EdgeInsets.all(10),
-        margin: const EdgeInsets.only(top: 20),
-        child: Form(
-            child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _construirTextInfoServico(
-                "Origem", Icons.location_pin, 1, _origemController),
-            Divider(
-              height: 20,
-              color: Colors.grey.shade600,
-            ),
-            _construirTextInfoServico(
-                "Destino", Icons.location_pin, 1, _destinoController),
-            Divider(
-              height: 20,
-              color: Colors.grey.shade600,
-            ),
-            _construirSelecionarDiaEHora(),
-            Divider(
-              height: 20,
-              color: Colors.grey.shade600,
-            ),
-            _construirTextInfoServico("Descrição da Carga",
-                Icons.library_books_sharp, 4, _descricaoController),
-            Divider(
-              height: 20,
-              color: Colors.grey.shade600,
-            ),
-            _construirTextInfoServico("Precisa de Ajudante ?",
-                Icons.supervised_user_circle, 1, _precisaAjudanteController)
-          ],
-        )),
-        decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Colors.grey.shade400)));
+    return Column(
+      children: [
+        Container(
+            padding: const EdgeInsets.all(10),
+            margin: const EdgeInsets.only(top: 20),
+            child: Form(
+                child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _construirTextInfoServico(
+                    "Origem", Icons.location_pin, 1, _origemController),
+                Divider(
+                  height: 20,
+                  color: Colors.grey.shade600,
+                ),
+                _construirTextInfoServico(
+                    "Destino", Icons.location_pin, 1, _destinoController),
+                Divider(
+                  height: 20,
+                  color: Colors.grey.shade600,
+                ),
+                _construirSelecionarDiaEHora(),
+                Divider(
+                  height: 20,
+                  color: Colors.grey.shade600,
+                ),
+                _construirTextInfoServico("Descrição da Carga",
+                    Icons.library_books_sharp, 4, _descricaoController),
+                Divider(
+                  height: 20,
+                  color: Colors.grey.shade600,
+                ),
+                _construirTextInfoServico(
+                    "Precisa de Ajudante ?",
+                    Icons.supervised_user_circle,
+                    1,
+                    _precisaAjudanteController),
+              ],
+            )),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.grey.shade400))),
+        _construirButonEnviarSolicitacao()
+      ],
+    );
   }
 
   Widget _construirTextInfoServico(String label, IconData? icon, int qtdLinhas,
@@ -291,6 +408,14 @@ class _SolicitarServicoState extends State<SolicitarServico> {
     );
   }
 
+  void _atualizarSolicitacaoServicoInfo() {
+    SolicitacaoServicoInfo.infoAtual.origem = _origemController.text;
+    SolicitacaoServicoInfo.infoAtual.destino = _destinoController.text;
+    SolicitacaoServicoInfo.infoAtual.descricaoCarga = _descricaoController.text;
+    SolicitacaoServicoInfo.infoAtual.hora = _horaController.text;
+    SolicitacaoServicoInfo.infoAtual.dia = _diaController.text;
+  }
+
   Widget _construirButonEnviarSolicitacao() {
     return Container(
       margin: const EdgeInsets.only(top: 20),
@@ -298,7 +423,7 @@ class _SolicitarServicoState extends State<SolicitarServico> {
       width: 400,
       child: TextButton(
           onPressed: () {
-            _atualizarSolicitarServicoInfo();
+            _atualizarSolicitacaoServicoInfo();
           },
           child:
               const Text("Enviar Solicitação", style: TextStyle(fontSize: 20)),
@@ -310,13 +435,5 @@ class _SolicitarServicoState extends State<SolicitarServico> {
                 borderRadius: BorderRadius.circular(50),
               )))),
     );
-  }
-
-  void _atualizarSolicitarServicoInfo() {
-    SolicitarServicoInfo.infoAtual.origem = _origemController.text;
-    SolicitarServicoInfo.infoAtual.destino = _destinoController.text;
-    SolicitarServicoInfo.infoAtual.descricaoCarga = _descricaoController.text;
-    SolicitarServicoInfo.infoAtual.hora = _horaController.text;
-    SolicitarServicoInfo.infoAtual.dia = _diaController.text;
   }
 }

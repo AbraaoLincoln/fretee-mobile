@@ -293,7 +293,9 @@ class _BuscaPrestadoresServicoFragmentoState
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const SolicitarServico()),
+          MaterialPageRoute(
+              builder: (context) =>
+                  SolicitarServico(prestadorServico: prestadorServico)),
         );
       },
       child: Container(

@@ -1,5 +1,5 @@
-class SolicitarServicoInfo {
-  static SolicitarServicoInfo infoAtual = SolicitarServicoInfo.vazio();
+class SolicitacaoServicoInfo {
+  static SolicitacaoServicoInfo infoAtual = SolicitacaoServicoInfo.vazio();
   String origem = "";
   String destino = "";
   String dia = "";
@@ -7,8 +7,8 @@ class SolicitarServicoInfo {
   String descricaoCarga = "";
   bool precisaAjudandte = false;
 
-  SolicitarServicoInfo.vazio();
+  SolicitacaoServicoInfo.vazio();
 
-  SolicitarServicoInfo.preencherTudo(String origem, String destino, String dia,
-      String hora, String descicao, bool precisaAjudante);
+  SolicitacaoServicoInfo.preencherTudo(String origem, String destino,
+      String dia, String hora, String descicao, bool precisaAjudante);
 }

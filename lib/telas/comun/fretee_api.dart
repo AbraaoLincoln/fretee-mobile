@@ -13,6 +13,8 @@ class FreteeApi {
   static String refreshToken = "";
   static const String bearer = "Bearer ";
 
+  static void refreshAccessToken() {}
+
   static Uri getLoginUri() {
     return Uri.parse(url + loginUrn);
   }
@@ -34,12 +36,25 @@ class FreteeApi {
     return bearer + accessToken;
   }
 
+  static String getUriPrestadoresServicoFoto(
+      String nomeUsuarioPrestadorServico) {
+    return url + "/prestador-servico/" + nomeUsuarioPrestadorServico + "/foto";
+  }
+
   static String getUriPrestadoresServicoFotoVeiculo(
       String nomeUsuarioPrestadorServico) {
     return url +
         "/prestador-servico/" +
         nomeUsuarioPrestadorServico +
         "/veiculo/foto";
+  }
+
+  static Uri getUriPrestadoresServicoVeiculoInfo(
+      String nomeUsuarioPrestadorServico) {
+    return Uri.parse(url +
+        "/prestador-servico/" +
+        nomeUsuarioPrestadorServico +
+        "/veiculo/info");
   }
 
   static Uri getUriUsuarioInfo() {
