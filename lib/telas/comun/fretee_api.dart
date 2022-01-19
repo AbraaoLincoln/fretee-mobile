@@ -1,6 +1,14 @@
+import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:fretee_mobile/telas/login.dart';
+import 'package:http/http.dart' as http;
+
 class FreteeApi {
   static const String url = "http://192.168.0.246:8080/api";
   static const String loginUrn = "/autenticacao/login";
+  static const String refreshTokenUrn = "/autenticacao/token/refresh";
   static const String cadastroUsuarioUrn = "/usuario";
   static const String cadastroPrestadorServicoUrn = "/prestador-servico";
   static const String prestadoresServicoProximoUrn =
@@ -13,7 +21,26 @@ class FreteeApi {
   static String refreshToken = "";
   static const String bearer = "Bearer ";
 
-  static void refreshAccessToken() {}
+  static void refreshAccessToken(BuildContext context) async {
+    Uri urlRereshToken = Uri.parse(url + refreshTokenUrn);
+    var response = await http.get(urlRereshToken,
+        headers: {HttpHeaders.authorizationHeader: getRefreshToken()});
+
+    switch (response.statusCode) {
+      case HttpStatus.ok:
+        var jsonBody = await json.decode(response.body);
+        accessToken = jsonBody["access_token"];
+        refreshToken = jsonBody["refresh_token"];
+        break;
+      default:
+        Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const Login(),
+            ),
+            (route) => false);
+    }
+  }
 
   static Uri getLoginUri() {
     return Uri.parse(url + loginUrn);
@@ -34,6 +61,10 @@ class FreteeApi {
 
   static String getAccessToken() {
     return bearer + accessToken;
+  }
+
+  static String getRefreshToken() {
+    return bearer + refreshToken;
   }
 
   static String getUriPrestadoresServicoFoto(

@@ -1,5 +1,4 @@
 import 'dart:developer';
-import 'dart:ffi';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -10,7 +9,6 @@ import 'package:intl/intl.dart';
 
 import 'comun/fretee_api.dart';
 import 'comun/http_utils.dart';
-import 'comun/usuario.dart';
 
 class SolicitarServico extends StatefulWidget {
   final dynamic prestadorServico;
@@ -22,7 +20,7 @@ class SolicitarServico extends StatefulWidget {
 
 class _SolicitarServicoState extends State<SolicitarServico> {
   dynamic prestadorServico;
-  late Map<String, dynamic> _veiculo;
+  VeiculoInfo _veiculo = VeiculoInfo();
 
   @override
   void initState() {
@@ -95,6 +93,8 @@ class _SolicitarServicoState extends State<SolicitarServico> {
               fit: BoxFit.cover,
               width: 100,
               height: 80,
+              errorBuilder: (context, object, stackTrace) =>
+                  const Text("Erro ao recuperar a imagem do usuario"),
             )),
         Expanded(
             child: Container(
@@ -156,31 +156,8 @@ class _SolicitarServicoState extends State<SolicitarServico> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(
-              child: FittedBox(
-            child: Image.network(
-              FreteeApi.getUriPrestadoresServicoFotoVeiculo(
-                  prestadorServico["nomeUsuario"]),
-              headers: {
-                HttpHeaders.authorizationHeader: FreteeApi.getAccessToken()
-              },
-            ),
-            fit: BoxFit.fill,
-          )),
-          Container(
-            margin: const EdgeInsets.only(top: 10, bottom: 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _construirTextInfoVeiculo(
-                    "Comprimento", _veiculo["comprimento"].toString()),
-                _construirTextInfoVeiculo(
-                    "Altura", _veiculo["altura"].toString()),
-                _construirTextInfoVeiculo(
-                    "Largura", _veiculo["largura"].toString())
-              ],
-            ),
-          )
+          _construirImagemDoVeiculo(),
+          _construirInfoDimensoesVeiculo()
         ],
       ),
       decoration: BoxDecoration(
@@ -189,6 +166,44 @@ class _SolicitarServicoState extends State<SolicitarServico> {
               bottomRight: Radius.circular(10)),
           border: Border.all(color: Colors.grey.shade400)),
     );
+  }
+
+  Widget _construirImagemDoVeiculo() {
+    return Expanded(
+        child: FittedBox(
+      child: Image.network(
+          FreteeApi.getUriPrestadoresServicoFotoVeiculo(
+              prestadorServico["nomeUsuario"]),
+          headers: {
+            HttpHeaders.authorizationHeader: FreteeApi.getAccessToken()
+          },
+          errorBuilder: (context, object, stackTrace) =>
+              const Text("Erro ao recuperar a imagem do veiculo")),
+      fit: BoxFit.fill,
+    ));
+  }
+
+  Widget _construirInfoDimensoesVeiculo() {
+    if (_veiculo.hasErros) {
+      return const Center(
+        child: Text("Nao foi possivel recuperar os dados do veiculo"),
+      );
+    } else {
+      return Container(
+        margin: const EdgeInsets.only(top: 10, bottom: 10),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _construirTextInfoVeiculo(
+                "Comprimento", _veiculo.info["comprimento"].toString()),
+            _construirTextInfoVeiculo(
+                "Altura", _veiculo.info["altura"].toString()),
+            _construirTextInfoVeiculo(
+                "Largura", _veiculo.info["largura"].toString())
+          ],
+        ),
+      );
+    }
   }
 
   Widget _construirTextInfoVeiculo(String label, String valor) {
@@ -226,28 +241,32 @@ class _SolicitarServicoState extends State<SolicitarServico> {
       return;
     }
 
-    var response = await http.get(
-        FreteeApi.getUriPrestadoresServicoVeiculoInfo(
-            prestadorServico["nomeUsuario"]),
-        headers: {
-          HttpHeaders.contentTypeHeader: HttpMediaType.FORM_URLENCODED,
-          HttpHeaders.authorizationHeader: FreteeApi.getAccessToken()
-        });
+    http.Response response;
 
-    switch (response.statusCode) {
-      case HttpStatus.ok:
-        var bodyJson = await json.decode(response.body);
-        _veiculo = bodyJson;
-        break;
-      case HttpStatus.badRequest:
-        log("bad request");
-        break;
-      case HttpStatus.forbidden:
-        log("Forbidden");
-        break;
-      default:
-        log(response.statusCode.toString());
-    }
+    do {
+      response = await http.get(
+          FreteeApi.getUriPrestadoresServicoVeiculoInfo(
+              prestadorServico["nomeUsuario"]),
+          headers: {
+            HttpHeaders.contentTypeHeader: HttpMediaType.FORM_URLENCODED,
+            HttpHeaders.authorizationHeader: FreteeApi.getAccessToken()
+          });
+
+      switch (response.statusCode) {
+        case HttpStatus.ok:
+          var bodyJson = await json.decode(response.body);
+          _veiculo.info = bodyJson;
+          _veiculo.hasErros = false;
+          break;
+        case HttpStatus.forbidden:
+          log("Forbidden");
+          FreteeApi.refreshAccessToken(context);
+          break;
+        default:
+          log(response.statusCode.toString());
+          _veiculo.hasErros = true;
+      }
+    } while (response.statusCode == HttpStatus.forbidden);
   }
 }
 
@@ -436,4 +455,9 @@ class _FormSolicitacaoServicoState extends State<FormSolicitacaoServico> {
               )))),
     );
   }
+}
+
+class VeiculoInfo {
+  bool hasErros = false;
+  late Map<String, dynamic> info;
 }

@@ -52,15 +52,15 @@ class _PerfilFragmentoState extends State<PerfilFragmento> {
       children: [
         ClipRRect(
             borderRadius: BorderRadius.circular(50),
-            child: Image.network(
-              FreteeApi.getUriUsuarioFoto(),
-              headers: {
-                HttpHeaders.authorizationHeader: FreteeApi.getAccessToken()
-              },
-              fit: BoxFit.cover,
-              width: 100,
-              height: 100,
-            )),
+            child: Image.network(FreteeApi.getUriUsuarioFoto(),
+                headers: {
+                  HttpHeaders.authorizationHeader: FreteeApi.getAccessToken()
+                },
+                fit: BoxFit.cover,
+                width: 100,
+                height: 100,
+                errorBuilder: (context, object, stackTrace) =>
+                    const Text("Erro ao recuperar a imagem do usuario"))),
         Text(
           _userInfo!["nomeCompleto"] ?? "Nome nao informado",
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),

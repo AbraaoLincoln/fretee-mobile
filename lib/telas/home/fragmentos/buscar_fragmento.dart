@@ -317,13 +317,15 @@ class _BuscaPrestadoresServicoFragmentoState
               child: SizedBox(
                 height: 100,
                 child: Image.network(
-                  FreteeApi.getUriPrestadoresServicoFotoVeiculo(
-                      prestadorServico["nomeUsuario"]),
-                  headers: {
-                    HttpHeaders.authorizationHeader: FreteeApi.getAccessToken()
-                  },
-                  fit: BoxFit.cover,
-                ),
+                    FreteeApi.getUriPrestadoresServicoFotoVeiculo(
+                        prestadorServico["nomeUsuario"]),
+                    headers: {
+                      HttpHeaders.authorizationHeader:
+                          FreteeApi.getAccessToken()
+                    },
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, object, stackTrace) =>
+                        const Text("Erro ao recuperar a imagem do veiculo")),
               ),
             ),
             Container(
@@ -390,21 +392,29 @@ class _BuscaPrestadoresServicoFragmentoState
   }
 
   Future<List<dynamic>> _buscarPrestadoresDeServicoProximos() async {
-    var response = await http.get(
-        FreteeApi.getUriPrestadoresServicoProximo(
-            Usuario.logado.location.latitude,
-            Usuario.logado.location.longitude),
-        headers: {
-          HttpHeaders.contentTypeHeader: HttpMediaType.FORM_URLENCODED,
-          HttpHeaders.authorizationHeader: FreteeApi.getAccessToken()
-        });
+    http.Response response;
+
+    do {
+      response = await http.get(
+          FreteeApi.getUriPrestadoresServicoProximo(
+              Usuario.logado.location.latitude,
+              Usuario.logado.location.longitude),
+          headers: {
+            HttpHeaders.contentTypeHeader: HttpMediaType.FORM_URLENCODED,
+            HttpHeaders.authorizationHeader: FreteeApi.getAccessToken()
+          });
+
+      if (response.statusCode == HttpStatus.forbidden) {
+        FreteeApi.refreshAccessToken(context);
+      }
+    } while (response.statusCode == HttpStatus.forbidden);
 
     switch (response.statusCode) {
       case HttpStatus.ok:
         var prestadoresServico = await json.decode(response.body);
         return prestadoresServico;
-      case HttpStatus.forbidden:
-        log("FORBIDDEN...");
+      default:
+        log(response.statusCode.toString());
         break;
     }
 
