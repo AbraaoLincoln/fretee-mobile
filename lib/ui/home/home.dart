@@ -1,3 +1,6 @@
+import 'dart:developer';
+
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:fretee_mobile/ui/home/fragmentos/buscar_fragmento.dart';
 import 'package:fretee_mobile/ui/home/fragmentos/fretes_agenda_fragmento.dart';
@@ -14,6 +17,32 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   Widget _activePage = const BuscaPrestadoresServicoFragmento();
   String _activePageTitle = "Buscar";
+
+  @override
+  void initState() {
+    super.initState();
+
+    //then()
+    //gives you the menssagem on which user taps and opened the app from
+    //terminated states
+    FirebaseMessaging.instance.getInitialMessage();
+
+    //Listen on foreground
+    FirebaseMessaging.onMessage.listen((message) {
+      if (message.notification != null) {
+        log(message.notification!.body.toString());
+        log(message.notification!.title.toString());
+
+        setState(() {
+          _activePage = const NotificacaoFragmento();
+          _activePageTitle = "Notificações";
+        });
+      }
+    });
+
+    //When the app is in background but opened and users taps on the notification
+    FirebaseMessaging.onMessageOpenedApp.listen((message) {});
+  }
 
   @override
   Widget build(BuildContext context) {
