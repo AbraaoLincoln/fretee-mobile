@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:fretee_mobile/business/solicitar_servico_info.dart';
 import 'dart:convert';
@@ -20,7 +21,7 @@ class SolicitarServico extends StatefulWidget {
 
 class _SolicitarServicoState extends State<SolicitarServico> {
   dynamic prestadorServico;
-  VeiculoInfo _veiculo = VeiculoInfo();
+  final VeiculoInfo _veiculo = VeiculoInfo();
 
   @override
   void initState() {
@@ -68,7 +69,7 @@ class _SolicitarServicoState extends State<SolicitarServico> {
                     children: [
                       _construirPrestadorServicoInfo(),
                       _construirVeiculoInfo(),
-                      const FormSolicitacaoServico()
+                      FormSolicitacaoServico(prestadorServico: prestadorServico)
                     ],
                   ),
                 );
@@ -271,7 +272,9 @@ class _SolicitarServicoState extends State<SolicitarServico> {
 }
 
 class FormSolicitacaoServico extends StatefulWidget {
-  const FormSolicitacaoServico({Key? key}) : super(key: key);
+  final dynamic prestadorServico;
+  const FormSolicitacaoServico({Key? key, this.prestadorServico})
+      : super(key: key);
 
   @override
   _FormSolicitacaoServicoState createState() => _FormSolicitacaoServicoState();
@@ -443,6 +446,10 @@ class _FormSolicitacaoServicoState extends State<FormSolicitacaoServico> {
       child: TextButton(
           onPressed: () {
             _atualizarSolicitacaoServicoInfo();
+            FirebaseMessaging.instance.getToken().then((value) {
+              print(value);
+              _enviarNotificacao(value);
+            });
           },
           child:
               const Text("Enviar Solicitação", style: TextStyle(fontSize: 20)),
@@ -454,6 +461,34 @@ class _FormSolicitacaoServicoState extends State<FormSolicitacaoServico> {
                 borderRadius: BorderRadius.circular(50),
               )))),
     );
+  }
+
+  Future<void> _enviarNotificacao(String? token) async {
+    if (token != null) {
+      var body = json.encode(getSolicitacaiServico());
+      var response = await http.post(FreteeApi.getUriSolicitarServico(token),
+          headers: {
+            HttpHeaders.contentTypeHeader: ContentType.json.toString(),
+            HttpHeaders.authorizationHeader: FreteeApi.getAccessToken()
+          },
+          body: body);
+
+      log(response.statusCode.toString());
+    } else {
+      log("Token null");
+    }
+  }
+
+  Map<String, String> getSolicitacaiServico() {
+    Map<String, String> solicitacaoServico = {};
+    solicitacaoServico["origem"] = _origemController.text;
+    solicitacaoServico["destino"] = _destinoController.text;
+    solicitacaoServico["dia"] = _diaController.text;
+    solicitacaoServico["hora"] = _horaController.text;
+    solicitacaoServico["descricao"] = _descricaoController.text;
+    solicitacaoServico["prestadorServicoNomeUsuario"] =
+        this.widget.prestadorServico["nomeUsuario"];
+    return solicitacaoServico;
   }
 }
 

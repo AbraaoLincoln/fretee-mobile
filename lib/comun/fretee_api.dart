@@ -17,6 +17,7 @@ class FreteeApi {
       "/prestador-servico/veiculo/foto";
   static const String usuarioFotoUrn = "/usuario/foto";
   static const String usuarioInfoUrn = "/usuario/info";
+  static const String solicitarServicoUrn = "/frete/solicitar/";
   static String accessToken = "";
   static String refreshToken = "";
   static const String bearer = "Bearer ";
@@ -94,5 +95,9 @@ class FreteeApi {
 
   static String getUriUsuarioFoto() {
     return url + usuarioFotoUrn;
+  }
+
+  static Uri getUriSolicitarServico(String token) {
+    return Uri.parse(url + solicitarServicoUrn + token);
   }
 }
