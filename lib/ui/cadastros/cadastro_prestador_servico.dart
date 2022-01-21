@@ -3,10 +3,9 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:flutter/services.dart';
-import 'package:fretee_mobile/telas/comun/device_location.dart';
-import 'package:fretee_mobile/telas/comun/fretee_api.dart';
-import 'package:fretee_mobile/telas/comun/usuario.dart';
-import 'package:fretee_mobile/telas/home/home.dart';
+import 'package:fretee_mobile/business/device_location.dart';
+import 'package:fretee_mobile/comun/fretee_api.dart';
+import 'package:fretee_mobile/business/usuario.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 

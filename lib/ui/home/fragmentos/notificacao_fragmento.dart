@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fretee_mobile/telas/solicitar_servico_info_preco.dart';
+import 'package:fretee_mobile/ui/solicitacao_frete/solicitar_servico_info_preco.dart';
 
 class NotificacaoFragmento extends StatefulWidget {
   const NotificacaoFragmento({Key? key}) : super(key: key);

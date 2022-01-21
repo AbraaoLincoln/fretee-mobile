@@ -3,12 +3,12 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:fretee_mobile/telas/comun/fretee_api.dart';
-import 'package:fretee_mobile/telas/comun/http_utils.dart';
-import 'package:fretee_mobile/telas/comun/usuario.dart';
+import 'package:fretee_mobile/comun/fretee_api.dart';
+import 'package:fretee_mobile/comun/http_utils.dart';
+import 'package:fretee_mobile/business/usuario.dart';
 import 'package:http/http.dart' as http;
-import 'package:fretee_mobile/telas/home/home.dart';
-import './cadastros/cadastro_usuario.dart';
+import 'package:fretee_mobile/ui/home/home.dart';
+import '../../ui/cadastros/cadastro_usuario.dart';
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);

@@ -3,8 +3,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fretee_mobile/telas/comun/fretee_api.dart';
-import 'package:fretee_mobile/telas/login.dart';
+import 'package:fretee_mobile/comun/fretee_api.dart';
+import 'package:fretee_mobile/ui/login/login.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 

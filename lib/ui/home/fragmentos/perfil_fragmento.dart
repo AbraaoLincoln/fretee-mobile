@@ -4,10 +4,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:fretee_mobile/telas/cadastros/cadastro_prestador_servico.dart';
-import 'package:fretee_mobile/telas/cadastros/cadastro_usuario.dart';
-import 'package:fretee_mobile/telas/comun/fretee_api.dart';
-import 'package:fretee_mobile/telas/login.dart';
+import 'package:fretee_mobile/ui/cadastros/cadastro_prestador_servico.dart';
+import 'package:fretee_mobile/ui/cadastros/cadastro_usuario.dart';
+import 'package:fretee_mobile/comun/fretee_api.dart';
+import 'package:fretee_mobile/ui/login/login.dart';
 
 class PerfilFragmento extends StatefulWidget {
   const PerfilFragmento({Key? key}) : super(key: key);

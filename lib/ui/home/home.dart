@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:fretee_mobile/telas/comun/device_location.dart';
-import 'package:fretee_mobile/telas/comun/usuario.dart';
-import 'package:fretee_mobile/telas/home/fragmentos/buscar_fragmento.dart';
-import 'package:fretee_mobile/telas/home/fragmentos/fretes_agenda_fragmento.dart';
-import 'package:fretee_mobile/telas/home/fragmentos/notificacao_fragmento.dart';
-import 'package:fretee_mobile/telas/home/fragmentos/perfil_fragmento.dart';
+import 'package:fretee_mobile/ui/home/fragmentos/buscar_fragmento.dart';
+import 'package:fretee_mobile/ui/home/fragmentos/fretes_agenda_fragmento.dart';
+import 'package:fretee_mobile/ui/home/fragmentos/notificacao_fragmento.dart';
+import 'package:fretee_mobile/ui/home/fragmentos/perfil_fragmento.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);

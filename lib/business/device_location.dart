@@ -1,6 +1,6 @@
 import 'dart:developer';
 
-import 'package:fretee_mobile/telas/comun/usuario.dart';
+import 'package:fretee_mobile/business/usuario.dart';
 import 'package:location/location.dart';
 
 class DeviceLocation {

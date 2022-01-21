@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:fretee_mobile/telas/home/home.dart';
-import './telas/login.dart';
+import 'package:fretee_mobile/ui/home/home.dart';
+import 'ui/login/login.dart';
 
 void main() {
   Widget home;

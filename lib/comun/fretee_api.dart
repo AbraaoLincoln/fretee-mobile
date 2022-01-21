@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:fretee_mobile/telas/login.dart';
+import 'package:fretee_mobile/ui/login/login.dart';
 import 'package:http/http.dart' as http;
 
 class FreteeApi {

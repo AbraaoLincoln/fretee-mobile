@@ -2,11 +2,11 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:fretee_mobile/telas/comun/device_location.dart';
-import 'package:fretee_mobile/telas/comun/fretee_api.dart';
-import 'package:fretee_mobile/telas/comun/http_utils.dart';
-import 'package:fretee_mobile/telas/comun/usuario.dart';
-import 'package:fretee_mobile/telas/solicita_servico.dart';
+import 'package:fretee_mobile/business/device_location.dart';
+import 'package:fretee_mobile/comun/fretee_api.dart';
+import 'package:fretee_mobile/comun/http_utils.dart';
+import 'package:fretee_mobile/business/usuario.dart';
+import 'package:fretee_mobile/ui/solicitacao_frete/solicita_servico.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 

@@ -2,13 +2,13 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:fretee_mobile/telas/comun/solicitar_servico_info.dart';
+import 'package:fretee_mobile/business/solicitar_servico_info.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
-import 'comun/fretee_api.dart';
-import 'comun/http_utils.dart';
+import 'package:fretee_mobile/comun/fretee_api.dart';
+import 'package:fretee_mobile/comun/http_utils.dart';
 
 class SolicitarServico extends StatefulWidget {
   final dynamic prestadorServico;

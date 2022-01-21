@@ -1,4 +1,4 @@
-import 'package:fretee_mobile/telas/comun/device_location.dart';
+import 'package:fretee_mobile/business/device_location.dart';
 
 class Usuario {
   static Usuario logado = Usuario();
