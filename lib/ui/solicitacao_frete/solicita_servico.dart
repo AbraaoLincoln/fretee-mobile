@@ -467,15 +467,38 @@ class _FormSolicitacaoServicoState extends State<FormSolicitacaoServico> {
   }
 
   Map<String, String> getSolicitacaiServico() {
+    List<String> dateParts = _diaController.text.split("-");
     Map<String, String> solicitacaoServico = {};
+
     solicitacaoServico["origem"] = _origemController.text;
     solicitacaoServico["destino"] = _destinoController.text;
-    solicitacaoServico["dia"] = _diaController.text;
-    solicitacaoServico["hora"] = _horaController.text;
-    solicitacaoServico["descricao"] = _descricaoController.text;
+    solicitacaoServico["data"] =
+        "${dateParts[2]}-${dateParts[1]}-${dateParts[0]}";
+    solicitacaoServico["hora"] = convertHoraTo24(_horaController.text);
+    solicitacaoServico["descricaoCarga"] = _descricaoController.text;
     solicitacaoServico["prestadorServicoNomeUsuario"] =
         this.widget.prestadorServico["nomeUsuario"];
+
     return solicitacaoServico;
+  }
+
+  String convertHoraTo24(String hora) {
+    if (hora.toLowerCase().contains("am") ||
+        hora.toLowerCase().contains("pm")) {
+      List<String> horaParts = _horaController.text.split(" ");
+      String hora24 = horaParts[0];
+
+      if (hora.toLowerCase().contains("pm")) {
+        List<String> horaPmParts = horaParts[0].split(":");
+        int horaPm = int.parse(horaPmParts[0]);
+        horaPm += 12;
+        hora24 = "${horaPm.toString()}:${horaPmParts[1]}";
+      }
+
+      return hora24;
+    } else {
+      return hora;
+    }
   }
 }
 
@@ -502,7 +525,10 @@ class _MyDialogState extends State<MyDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-        title: const Text("Enviando solicitação"),
+        title: const Text(
+          "Enviando solicitação",
+          textAlign: TextAlign.center,
+        ),
         content: _construirMessageRe());
   }
 
@@ -563,43 +589,64 @@ class _MyDialogState extends State<MyDialog> {
   Widget showResponse() {
     switch (responseStatusCode) {
       case HttpStatus.created:
-        return SizedBox(
-          height: 100,
-          child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                const Icon(Icons.send),
-                const Text("Operacao realizada com suscesso"),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const Home(),
-                        ),
-                        (route) => false);
-                  },
-                  child: const Text('OK'),
-                )
-              ]),
-        );
+        return _construirResposta(
+            widget.successMessage ?? "Operação realizada com sucesso",
+            Icons.send, () {
+          Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const Home(),
+              ),
+              (route) => false);
+        });
       default:
-        return SizedBox(
-          height: 110,
-          child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                const Icon(Icons.error),
-                Text(
-                    "Erro ao realizada a operação, statuscode: $responseStatusCode"),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text('OK'),
-                )
-              ]),
-        );
+        return _construirResposta(
+            widget.erroMessage ??
+                "Erro ao realizada a operação, statuscode: $responseStatusCode",
+            Icons.error, () {
+          Navigator.pop(context);
+        });
     }
+  }
+
+  Widget _construirResposta(
+      String msg, IconData icon, void Function() callback) {
+    return SizedBox(
+      height: 200,
+      child:
+          Column(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
+        Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(50),
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.5),
+                  spreadRadius: 2,
+                  blurRadius: 2,
+                  offset: const Offset(2, 3),
+                ),
+              ]),
+          child: Icon(
+            icon,
+            size: 50,
+          ),
+        ),
+        Text(msg, textAlign: TextAlign.center),
+        TextButton(
+          style: TextButton.styleFrom(
+              backgroundColor: Colors.black,
+              primary: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(50),
+              ),
+              // elevation: 15.0,
+              minimumSize: const Size(200, 10)),
+          onPressed: callback,
+          child: const Text('OK'),
+        )
+      ]),
+    );
   }
 }
