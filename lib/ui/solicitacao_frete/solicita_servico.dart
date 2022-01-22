@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:fretee_mobile/business/solicitar_servico_info.dart';
+import 'package:fretee_mobile/ui/home/home.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -446,10 +447,7 @@ class _FormSolicitacaoServicoState extends State<FormSolicitacaoServico> {
       child: TextButton(
           onPressed: () {
             _atualizarSolicitacaoServicoInfo();
-            FirebaseMessaging.instance.getToken().then((value) {
-              print(value);
-              _enviarNotificacao(value);
-            });
+            _solicitarServico();
           },
           child:
               const Text("Enviar Solicitação", style: TextStyle(fontSize: 20)),
@@ -463,20 +461,9 @@ class _FormSolicitacaoServicoState extends State<FormSolicitacaoServico> {
     );
   }
 
-  Future<void> _enviarNotificacao(String? token) async {
-    if (token != null) {
-      var body = json.encode(getSolicitacaiServico());
-      var response = await http.post(FreteeApi.getUriSolicitarServico(token),
-          headers: {
-            HttpHeaders.contentTypeHeader: ContentType.json.toString(),
-            HttpHeaders.authorizationHeader: FreteeApi.getAccessToken()
-          },
-          body: body);
-
-      log(response.statusCode.toString());
-    } else {
-      log("Token null");
-    }
+  Future<void> _solicitarServico() async {
+    var body = json.encode(getSolicitacaiServico());
+    showDialog(context: context, builder: (_) => MyDialog(body: body));
   }
 
   Map<String, String> getSolicitacaiServico() {
@@ -495,4 +482,124 @@ class _FormSolicitacaoServicoState extends State<FormSolicitacaoServico> {
 class VeiculoInfo {
   bool hasErros = false;
   late Map<String, dynamic> info;
+}
+
+class MyDialog extends StatefulWidget {
+  final String body;
+  final String? successMessage;
+  final String? erroMessage;
+  const MyDialog(
+      {Key? key, required this.body, this.successMessage, this.erroMessage})
+      : super(key: key);
+
+  @override
+  _MyDialogState createState() => _MyDialogState();
+}
+
+class _MyDialogState extends State<MyDialog> {
+  late int responseStatusCode;
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+        title: const Text("Enviando solicitação"),
+        content: _construirMessageRe());
+  }
+
+  FutureBuilder<void> _construirMessageRe() {
+    return FutureBuilder<void>(
+        builder: (context, snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.none:
+            case ConnectionState.waiting:
+              return const SizedBox(
+                height: 100,
+                child: Center(
+                  child: CircularProgressIndicator(
+                    semanticsLabel: 'Linear progress indicator',
+                  ),
+                ),
+              );
+            default:
+              if (snapshot.hasError) {
+                return const Center(
+                  child: Text(
+                    "Erro",
+                    style: TextStyle(color: Colors.black, fontSize: 25),
+                    textAlign: TextAlign.center,
+                  ),
+                );
+              } else {
+                return showResponse();
+              }
+          }
+        },
+        future: _solicitarServico(widget.body));
+  }
+
+  Future<int> _solicitarServico(String bodyStringfy) async {
+    http.Response response;
+
+    do {
+      response = await http.post(FreteeApi.getUriSolicitarServico(),
+          headers: {
+            HttpHeaders.contentTypeHeader: ContentType.json.toString(),
+            HttpHeaders.authorizationHeader: FreteeApi.getAccessToken()
+          },
+          body: bodyStringfy);
+
+      log(response.statusCode.toString());
+
+      if (response.statusCode == HttpStatus.forbidden) {
+        FreteeApi.refreshAccessToken(context);
+      }
+    } while (response.statusCode == HttpStatus.forbidden);
+
+    responseStatusCode = response.statusCode;
+
+    return response.statusCode;
+  }
+
+  Widget showResponse() {
+    switch (responseStatusCode) {
+      case HttpStatus.created:
+        return SizedBox(
+          height: 100,
+          child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                const Icon(Icons.send),
+                const Text("Operacao realizada com suscesso"),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const Home(),
+                        ),
+                        (route) => false);
+                  },
+                  child: const Text('OK'),
+                )
+              ]),
+        );
+      default:
+        return SizedBox(
+          height: 110,
+          child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                const Icon(Icons.error),
+                Text(
+                    "Erro ao realizada a operação, statuscode: $responseStatusCode"),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text('OK'),
+                )
+              ]),
+        );
+    }
+  }
 }

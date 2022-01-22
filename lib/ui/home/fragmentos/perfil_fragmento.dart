@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:fretee_mobile/business/solicitar_servico_info.dart';
 import 'package:http/http.dart' as http;
 import 'package:fretee_mobile/ui/cadastros/cadastro_prestador_servico.dart';
 import 'package:fretee_mobile/ui/cadastros/cadastro_usuario.dart';
@@ -194,6 +195,7 @@ class _PerfilFragmentoState extends State<PerfilFragmento> {
         _ContruirItemMenu("Sair do App", "Sair", Icons.logout, () {
           FreteeApi.accessToken = "";
           FreteeApi.refreshToken = "";
+          SolicitacaoServicoInfo.infoAtual = SolicitacaoServicoInfo.vazio();
 
           Navigator.pushAndRemoveUntil(
               context,

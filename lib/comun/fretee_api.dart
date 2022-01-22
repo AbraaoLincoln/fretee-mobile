@@ -17,7 +17,9 @@ class FreteeApi {
       "/prestador-servico/veiculo/foto";
   static const String usuarioFotoUrn = "/usuario/foto";
   static const String usuarioInfoUrn = "/usuario/info";
-  static const String solicitarServicoUrn = "/frete/solicitar/";
+  static const String usuarioAtualizarFirebaseTokenUrn =
+      "/usuario/firebase/token";
+  static const String solicitarServicoUrn = "/frete/solicita-servico/solicitar";
   static String accessToken = "";
   static String refreshToken = "";
   static const String bearer = "Bearer ";
@@ -97,7 +99,11 @@ class FreteeApi {
     return url + usuarioFotoUrn;
   }
 
-  static Uri getUriSolicitarServico(String token) {
-    return Uri.parse(url + solicitarServicoUrn + token);
+  static Uri getUriSolicitarServico() {
+    return Uri.parse(url + solicitarServicoUrn);
+  }
+
+  static Uri getUriAtualizarFirebaseToken() {
+    return Uri.parse(url + usuarioAtualizarFirebaseTokenUrn);
   }
 }

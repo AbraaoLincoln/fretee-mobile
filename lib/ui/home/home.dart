@@ -1,7 +1,12 @@
-import 'dart:developer';
+import 'dart:io';
 
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:fretee_mobile/comun/fretee_api.dart';
+import 'package:fretee_mobile/comun/http_utils.dart';
+import 'package:http/http.dart' as http;
+import 'dart:developer';
+import 'package:firebase_messaging/firebase_messaging.dart';
+
 import 'package:fretee_mobile/ui/home/fragmentos/buscar_fragmento.dart';
 import 'package:fretee_mobile/ui/home/fragmentos/fretes_agenda_fragmento.dart';
 import 'package:fretee_mobile/ui/home/fragmentos/notificacao_fragmento.dart';
@@ -42,6 +47,11 @@ class _HomeState extends State<Home> {
 
     //When the app is in background but opened and users taps on the notification
     FirebaseMessaging.onMessageOpenedApp.listen((message) {});
+
+    FirebaseMessaging.instance.getToken().then((value) {
+      log("Atualizando firebase token");
+      atualizarFirebaseToken(value);
+    });
   }
 
   @override
@@ -106,4 +116,16 @@ class _HomeState extends State<Home> {
       ]),
     );
   }
+}
+
+Future<void> atualizarFirebaseToken(String? token) async {
+  var response =
+      await http.put(FreteeApi.getUriAtualizarFirebaseToken(), headers: {
+    HttpHeaders.authorizationHeader: FreteeApi.getAccessToken(),
+    HttpHeaders.contentTypeHeader: HttpMediaType.FORM_URLENCODED
+  }, body: {
+    "token": token
+  });
+
+  log(response.statusCode.toString());
 }
