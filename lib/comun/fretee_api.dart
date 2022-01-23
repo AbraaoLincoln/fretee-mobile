@@ -20,6 +20,7 @@ class FreteeApi {
   static const String usuarioAtualizarFirebaseTokenUrn =
       "/usuario/firebase/token";
   static const String solicitarServicoUrn = "/frete/solicita-servico/solicitar";
+  static const String listaDeNotificaoesUrn = "/frete/notificacao";
   static String accessToken = "";
   static String refreshToken = "";
   static const String bearer = "Bearer ";
@@ -105,5 +106,9 @@ class FreteeApi {
 
   static Uri getUriAtualizarFirebaseToken() {
     return Uri.parse(url + usuarioAtualizarFirebaseTokenUrn);
+  }
+
+  static Uri getUriListaNotificacoes() {
+    return Uri.parse(url + listaDeNotificaoesUrn);
   }
 }
