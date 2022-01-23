@@ -13,19 +13,24 @@ import 'package:fretee_mobile/ui/home/fragmentos/notificacao_fragmento.dart';
 import 'package:fretee_mobile/ui/home/fragmentos/perfil_fragmento.dart';
 
 class Home extends StatefulWidget {
-  const Home({Key? key}) : super(key: key);
+  final Widget? activePage;
+  final String? activePageTitle;
+  const Home({Key? key, this.activePage, this.activePageTitle})
+      : super(key: key);
 
   @override
   _HomeState createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
-  Widget _activePage = const BuscaPrestadoresServicoFragmento();
-  String _activePageTitle = "Buscar";
+  late Widget _activePage;
+  late String _activePageTitle;
 
   @override
   void initState() {
     super.initState();
+    _activePage = widget.activePage ?? const BuscaPrestadoresServicoFragmento();
+    _activePageTitle = widget.activePageTitle ?? "Buscar";
 
     //then()
     //gives you the menssagem on which user taps and opened the app from
@@ -38,15 +43,43 @@ class _HomeState extends State<Home> {
         log(message.notification!.body.toString());
         log(message.notification!.title.toString());
 
-        setState(() {
-          _activePage = const NotificacaoFragmento();
-          _activePageTitle = "Notificações";
-        });
+        showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+                  title: Text(message.notification!.title.toString()),
+                  content: Text(message.notification!.body.toString()),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const Home(
+                                activePage: NotificacaoFragmento(),
+                                activePageTitle: "Notificações",
+                              ),
+                            ),
+                            (route) => false);
+                      },
+                      child: const Text('OK'),
+                    )
+                  ],
+                ));
       }
     });
 
     //When the app is in background but opened and users taps on the notification
-    FirebaseMessaging.onMessageOpenedApp.listen((message) {});
+    FirebaseMessaging.onMessageOpenedApp.listen((message) {
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const Home(
+              activePage: NotificacaoFragmento(),
+              activePageTitle: "Notificações",
+            ),
+          ),
+          (route) => false);
+    });
 
     FirebaseMessaging.instance.getToken().then((value) {
       log("Atualizando firebase token");
