@@ -6,6 +6,8 @@ import 'package:flutter/services.dart';
 import 'package:fretee_mobile/business/device_location.dart';
 import 'package:fretee_mobile/comun/fretee_api.dart';
 import 'package:fretee_mobile/business/usuario.dart';
+import 'package:fretee_mobile/ui/home/fragmentos/perfil_fragmento.dart';
+import 'package:fretee_mobile/ui/home/home.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 
@@ -25,7 +27,7 @@ class _CadastroPrestadorServicoState extends State<CadastroPrestadorServico> {
   final _placaTextControlle = TextEditingController();
   String _msgFotoNaoSelecionada = "";
   Color _borberColorImagePicker = Colors.grey.shade400;
-  GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   late MyDialog _myDialog;
 
@@ -337,7 +339,17 @@ class _MyDialogState extends State<MyDialog> {
   }
 
   void _loadPerfil() {
-    Navigator.pop(context);
-    Navigator.pop(context);
+    //Navigator.pop(context);
+    //Navigator.pop(context);
+
+    Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const Home(
+            activePage: PerfilFragmento(),
+            activePageTitle: "Perfil",
+          ),
+        ),
+        (route) => false);
   }
 }

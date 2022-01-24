@@ -289,6 +289,7 @@ class _FormSolicitacaoServicoState extends State<FormSolicitacaoServico> {
   final TextEditingController _descricaoController = TextEditingController();
   final TextEditingController _precisaAjudanteController =
       TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -313,39 +314,45 @@ class _FormSolicitacaoServicoState extends State<FormSolicitacaoServico> {
             padding: const EdgeInsets.all(10),
             margin: const EdgeInsets.only(top: 20),
             child: Form(
+                key: _formKey,
                 child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _construirTextInfoServico(
-                    "Origem", Icons.location_pin, 1, _origemController),
-                Divider(
-                  height: 20,
-                  color: Colors.grey.shade600,
-                ),
-                _construirTextInfoServico(
-                    "Destino", Icons.location_pin, 1, _destinoController),
-                Divider(
-                  height: 20,
-                  color: Colors.grey.shade600,
-                ),
-                _construirSelecionarDiaEHora(),
-                Divider(
-                  height: 20,
-                  color: Colors.grey.shade600,
-                ),
-                _construirTextInfoServico("Descrição da Carga",
-                    Icons.library_books_sharp, 4, _descricaoController),
-                Divider(
-                  height: 20,
-                  color: Colors.grey.shade600,
-                ),
-                _construirTextInfoServico(
-                    "Precisa de Ajudante ?",
-                    Icons.supervised_user_circle,
-                    1,
-                    _precisaAjudanteController),
-              ],
-            )),
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _construirTextInfoServico("Origem", Icons.location_pin, 1,
+                        _origemController, true),
+                    Divider(
+                      height: 20,
+                      color: Colors.grey.shade600,
+                    ),
+                    _construirTextInfoServico("Destino", Icons.location_pin, 1,
+                        _destinoController, true),
+                    Divider(
+                      height: 20,
+                      color: Colors.grey.shade600,
+                    ),
+                    _construirSelecionarDiaEHora(),
+                    Divider(
+                      height: 20,
+                      color: Colors.grey.shade600,
+                    ),
+                    _construirTextInfoServico(
+                        "Descrição da Carga",
+                        Icons.library_books_sharp,
+                        4,
+                        _descricaoController,
+                        false),
+                    Divider(
+                      height: 20,
+                      color: Colors.grey.shade600,
+                    ),
+                    _construirTextInfoServico(
+                        "Precisa de Ajudante ?",
+                        Icons.supervised_user_circle,
+                        1,
+                        _precisaAjudanteController,
+                        false),
+                  ],
+                )),
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(color: Colors.grey.shade400))),
@@ -355,13 +362,19 @@ class _FormSolicitacaoServicoState extends State<FormSolicitacaoServico> {
   }
 
   Widget _construirTextInfoServico(String label, IconData? icon, int qtdLinhas,
-      TextEditingController contoller) {
+      TextEditingController contoller, bool validate) {
     return Row(
       children: [
         Expanded(
             child: TextFormField(
                 maxLines: qtdLinhas,
                 controller: contoller,
+                validator: validate
+                    ? (value) {
+                        if (value == null || value.isEmpty)
+                          return "defina a/o $label";
+                      }
+                    : null,
                 style: const TextStyle(fontWeight: FontWeight.bold),
                 decoration: InputDecoration(
                     label: RichText(
@@ -397,6 +410,9 @@ class _FormSolicitacaoServicoState extends State<FormSolicitacaoServico> {
                 setState(() {});
               },
               controller: _diaController,
+              validator: (value) {
+                if (value == null || value.isEmpty) return "escolha uma data";
+              },
               readOnly: true,
               style: const TextStyle(fontWeight: FontWeight.bold),
               decoration: const InputDecoration(
@@ -418,6 +434,9 @@ class _FormSolicitacaoServicoState extends State<FormSolicitacaoServico> {
                 setState(() {});
               },
               controller: _horaController,
+              validator: (value) {
+                if (value == null || value.isEmpty) return "escolha a hora";
+              },
               readOnly: true,
               style: const TextStyle(fontWeight: FontWeight.bold),
               decoration: const InputDecoration(
@@ -446,8 +465,10 @@ class _FormSolicitacaoServicoState extends State<FormSolicitacaoServico> {
       width: 400,
       child: TextButton(
           onPressed: () {
-            _atualizarSolicitacaoServicoInfo();
-            _solicitarServico();
+            if (_validateForm()) {
+              _atualizarSolicitacaoServicoInfo();
+              _solicitarServico();
+            }
           },
           child:
               const Text("Enviar Solicitação", style: TextStyle(fontSize: 20)),
@@ -491,7 +512,7 @@ class _FormSolicitacaoServicoState extends State<FormSolicitacaoServico> {
       if (hora.toLowerCase().contains("pm")) {
         List<String> horaPmParts = horaParts[0].split(":");
         int horaPm = int.parse(horaPmParts[0]);
-        horaPm += 12;
+        if (horaPm > 12) horaPm += 12;
         hora24 = "${horaPm.toString()}:${horaPmParts[1]}";
       }
 
@@ -499,6 +520,13 @@ class _FormSolicitacaoServicoState extends State<FormSolicitacaoServico> {
     } else {
       return hora;
     }
+  }
+
+  bool _validateForm() {
+    var form = _formKey.currentState;
+    if (!form!.validate()) return false;
+
+    return true;
   }
 }
 

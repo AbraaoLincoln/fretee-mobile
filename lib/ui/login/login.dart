@@ -18,9 +18,9 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-  GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  TextEditingController _nomeUsuarioController = TextEditingController();
-  TextEditingController _senhaController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _nomeUsuarioController = TextEditingController();
+  final TextEditingController _senhaController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +59,8 @@ class _LoginState extends State<Login> {
                       fillColor: Colors.white,
                       filled: true,
                       border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(50.0))),
+                          borderRadius: BorderRadius.circular(50.0)),
+                      errorStyle: const TextStyle(height: 0)),
                   controller: _nomeUsuarioController,
                   validator: (value) {
                     if (value!.isEmpty)
@@ -78,13 +79,14 @@ class _LoginState extends State<Login> {
                       filled: true,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(50.0),
-                      )),
+                      ),
+                      errorStyle: const TextStyle(height: 0)),
                   obscureText: true,
                   enableSuggestions: false,
                   autocorrect: false,
                   controller: _senhaController,
                   validator: (value) {
-                    if (value!.isEmpty) return "Insira a senha cadastrada";
+                    if (value!.isEmpty) return "Insira a senha";
                   },
                 ),
               ),
@@ -202,6 +204,16 @@ class _LoginState extends State<Login> {
         break;
       case HttpStatus.forbidden:
         log("forbidden...");
+        final snackBar = SnackBar(
+          content: const Text('Nome de usuário ou senha invalido'),
+          action: SnackBarAction(
+              label: "ok",
+              onPressed: () {
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              }),
+          duration: const Duration(days: 1),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
         return false;
     }
 

@@ -9,12 +9,12 @@ class SolicitarServicoPreco extends StatefulWidget {
 }
 
 class _SolicitarServicoPrecoState extends State<SolicitarServicoPreco> {
-  late String _nomeUsuario = "Cicrana";
-  late double _reputacaoUsuario = 4.1;
-  late double __distanciaUsuario = 3.2;
-  late String _origem = "Rua tal, Natal/RN";
-  late String _destino = "Rua ali, Extremoz/RN";
-  TextEditingController _precoController = TextEditingController();
+  late final String _nomeUsuario = "Cicrana";
+  late final double _reputacaoUsuario = 4.1;
+  late final double __distanciaUsuario = 3.2;
+  late final String _origem = "Rua tal, Natal/RN";
+  late final String _destino = "Rua ali, Extremoz/RN";
+  final TextEditingController _precoController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {

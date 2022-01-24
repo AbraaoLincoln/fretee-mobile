@@ -104,11 +104,27 @@ class _NotificacaoFragmentoState extends State<NotificacaoFragmento> {
                   return RefreshIndicator(
                       child: SizedBox(
                           height: MediaQuery.of(context).size.height,
-                          child: const SingleChildScrollView(
-                            physics: AlwaysScrollableScrollPhysics(),
-                            child: Center(
-                                child: Text(
-                                    "Você não tem nenhuma notificação no momento")),
+                          child: SingleChildScrollView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            child: Container(
+                              //color: Colors.red,
+                              height: 600,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: const [
+                                  Icon(
+                                    Icons.notifications_off,
+                                    size: 100,
+                                  ),
+                                  Center(
+                                      child: Text(
+                                    "Você não tem nenhuma notificação no momento",
+                                    style: TextStyle(fontSize: 20),
+                                    textAlign: TextAlign.center,
+                                  ))
+                                ],
+                              ),
+                            ),
                           )),
                       onRefresh: _refreshListaDeNotificacoes);
                 }
@@ -154,14 +170,14 @@ class _NotificacaoFragmentoState extends State<NotificacaoFragmento> {
 
     if (_notificacoes[index] != null &&
         _notificacoes[index]["status"] != null) {
-      return _buildNotificacao(_notificacoes[index]["status"]);
+      return _buildNotificacao(_notificacoes[index]);
     }
 
     return notificacao;
   }
 
-  Widget _buildNotificacao(String status) {
-    switch (status) {
+  Widget _buildNotificacao(dynamic notificacao) {
+    switch (notificacao["status"]) {
       case StatusFrete.solicitando:
         return _construirNotificacao(
             "Solicitação De Serviço", Icons.email, Colors.black, () {
