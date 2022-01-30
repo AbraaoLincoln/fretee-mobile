@@ -166,26 +166,7 @@ class _BuscaPrestadoresServicoFragmentoState
   }
 
   Future<void> _getResource() async {
-    await DeviceLocation.getLocation();
-
-    if (!Usuario.logado.location.gpsEnable) {
-      _prestadoresDeServico = [];
-      erroGps.hasError = true;
-      erroGps.widgetShowErro = const Center(
-        child: Text("O Gps não está ativado"),
-      );
-      return;
-    }
-
-    if (!Usuario.logado.location.permissionGranted) {
-      _prestadoresDeServico = [];
-      erroGps.hasError = true;
-      erroGps.widgetShowErro = const Center(
-        child: Text("O app não tem permissão de usar o gps do dispositivo."),
-      );
-      return;
-    }
-
+    await atualizarUsuarioLogadoLocalizacao(context);
     _prestadoresDeServico = await _buscarPrestadoresDeServicoProximos();
   }
 
@@ -431,4 +412,63 @@ class _BuscaPrestadoresServicoFragmentoState
 class ErroGps {
   bool hasError = false;
   Widget widgetShowErro = const Text("Erro Gps");
+}
+
+Future<void> atualizarUsuarioLogadoLocalizacao(BuildContext context) async {
+  await getLocalizacaoDispositivo(context);
+  log("longitude ${Usuario.logado.location.longitude}");
+  log("latitude ${Usuario.logado.location.latitude}");
+
+  Map<String, double?> requestBody = {};
+  requestBody["longitude"] = Usuario.logado.location.longitude;
+  requestBody["latitude"] = Usuario.logado.location.latitude;
+  String bodyStringfy = json.encode(requestBody);
+
+  http.Response response;
+
+  do {
+    response = await http.put(FreteeApi.getUriAtualizarLocalizacao(),
+        headers: {
+          HttpHeaders.contentTypeHeader: ContentType.json.toString(),
+          HttpHeaders.authorizationHeader: FreteeApi.getAccessToken()
+        },
+        body: bodyStringfy);
+
+    if (response.statusCode == HttpStatus.forbidden) {
+      FreteeApi.refreshAccessToken(context);
+    }
+  } while (response.statusCode == HttpStatus.forbidden);
+
+  if (response.statusCode != HttpStatus.ok) {
+    log("Nao foi possivel atualizar a localizacao do usuario locado");
+    log(response.statusCode.toString());
+  }
+}
+
+Future<void> getLocalizacaoDispositivo(BuildContext context) async {
+  await DeviceLocation.getLocation();
+
+  if (!Usuario.logado.location.gpsEnable) {
+    showDialog(
+      context: context,
+      builder: (context) => const AlertDialog(
+        title: Text("GPS"),
+        content: Center(
+          child: Text("O Gps não está ativado"),
+        ),
+      ),
+    );
+  }
+
+  if (!Usuario.logado.location.permissionGranted) {
+    showDialog(
+      context: context,
+      builder: (context) => const AlertDialog(
+        title: Text("GPS"),
+        content: Center(
+          child: Text("O app não tem permissão de usar o gps do dispositivo."),
+        ),
+      ),
+    );
+  }
 }

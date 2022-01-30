@@ -221,8 +221,6 @@ class _CadastroPrestadorServicoState extends State<CadastroPrestadorServico> {
     await DeviceLocation.getLocation();
     log("Cadastrando usuario como prestador de servico");
     log("username ${Usuario.logado.nomeUsuario}");
-    log("longitude ${Usuario.logado.location.longitude}");
-    log("latitude ${Usuario.logado.location.latitude}");
 
     var request = http.MultipartRequest(
       "POST",
@@ -236,8 +234,6 @@ class _CadastroPrestadorServicoState extends State<CadastroPrestadorServico> {
     request.fields["comprimento"] = _comprimentoTextControlle.text;
     request.fields["altura"] = _alturaTextControlle.text;
     request.fields["placa"] = _placaTextControlle.text;
-    request.fields["longitude"] = Usuario.logado.location.longitude.toString();
-    request.fields["latitude"] = Usuario.logado.location.latitude.toString();
 
     var imageVeiculo =
         await http.MultipartFile.fromPath("fotoVeiculo", _image!.path);

@@ -17,6 +17,7 @@ class FreteeApi {
       "/prestador-servico/veiculo/foto";
   static const String usuarioFotoUrn = "/usuario/foto";
   static const String usuarioInfoUrn = "/usuario/info";
+  static const String usuarioAtualizarLocalizacaoUrn = "/usuario/localizacao";
   static const String usuarioAtualizarFirebaseTokenUrn =
       "/usuario/firebase/token";
   static const String solicitarServicoUrn = "/frete/solicita-servico/solicitar";
@@ -102,6 +103,10 @@ class FreteeApi {
 
   static Uri getUriSolicitarServico() {
     return Uri.parse(url + solicitarServicoUrn);
+  }
+
+  static Uri getUriAtualizarLocalizacao() {
+    return Uri.parse(url + usuarioAtualizarLocalizacaoUrn);
   }
 
   static Uri getUriAtualizarFirebaseToken() {
