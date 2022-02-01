@@ -1,7 +1,6 @@
 import 'dart:developer';
 import 'dart:io';
 
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:fretee_mobile/business/solicitar_servico_info.dart';
 import 'package:fretee_mobile/ui/home/home.dart';
@@ -9,8 +8,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
-import 'package:fretee_mobile/comun/fretee_api.dart';
-import 'package:fretee_mobile/comun/http_utils.dart';
+import 'package:fretee_mobile/utils/fretee_api.dart';
+import 'package:fretee_mobile/utils/http_utils.dart';
 
 class SolicitarServico extends StatefulWidget {
   final dynamic prestadorServico;

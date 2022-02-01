@@ -1,11 +1,8 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:fretee_mobile/business/device_location.dart';
-import 'package:fretee_mobile/business/usuario.dart';
-import 'package:fretee_mobile/comun/fretee_api.dart';
-import 'package:fretee_mobile/comun/http_utils.dart';
+import 'package:fretee_mobile/utils/fretee_api.dart';
+import 'package:fretee_mobile/utils/http_utils.dart';
 import 'package:http/http.dart' as http;
 import 'dart:developer';
 import 'package:firebase_messaging/firebase_messaging.dart';

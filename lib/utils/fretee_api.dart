@@ -97,12 +97,28 @@ class FreteeApi {
     return Uri.parse(url + usuarioInfoUrn);
   }
 
+  static Uri getUriUsuarioInfoPorNomeUsuario(String nomeUsuario) {
+    return Uri.parse(url + "/usuario/$nomeUsuario/info");
+  }
+
   static String getUriUsuarioFoto() {
     return url + usuarioFotoUrn;
   }
 
+  static Uri getUriFreteInfo(int freteId) {
+    return Uri.parse(url + "/frete/notificacao/$freteId/info");
+  }
+
   static Uri getUriSolicitarServico() {
     return Uri.parse(url + solicitarServicoUrn);
+  }
+
+  static Uri getUriCancelarSolicitacao(int freteId) {
+    return Uri.parse(url + "/frete/$freteId/solicitacao/cancelar");
+  }
+
+  static Uri getUriRecusarSolicitacao(int freteId) {
+    return Uri.parse(url + "/frete/$freteId/solicitacao/recusar");
   }
 
   static Uri getUriAtualizarLocalizacao() {
@@ -115,5 +131,13 @@ class FreteeApi {
 
   static Uri getUriListaNotificacoes() {
     return Uri.parse(url + listaDeNotificaoesUrn);
+  }
+
+  static Uri getUriInformarPreco(int freteId) {
+    return Uri.parse(url + "/frete/$freteId/preco/informar");
+  }
+
+  static Uri getUriRecusarPreco(int freteId) {
+    return Uri.parse(url + "/frete/$freteId/preco/recusar");
   }
 }

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:fretee_mobile/business/device_location.dart';
-import 'package:fretee_mobile/comun/fretee_api.dart';
+import 'package:fretee_mobile/utils/fretee_api.dart';
 import 'package:fretee_mobile/business/usuario.dart';
 import 'package:fretee_mobile/ui/home/fragmentos/perfil_fragmento.dart';
 import 'package:fretee_mobile/ui/home/home.dart';

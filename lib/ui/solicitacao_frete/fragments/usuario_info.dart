@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:fretee_mobile/utils/fretee_api.dart';
 
 class UsuarioInfo extends StatelessWidget {
   final Map<String, dynamic> usuarioInfo;
@@ -13,14 +16,22 @@ class UsuarioInfo extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(10),
       child: Row(children: [
-        ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: Image.asset(
-              "imagens/user_female.png",
-              fit: BoxFit.cover,
-              width: 100,
-              height: 80,
-            )),
+        SizedBox(
+          height: 80,
+          width: 80,
+          child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.network(
+                FreteeApi.getUriPrestadoresServicoFoto(
+                    usuarioInfo["nomeUsuario"]),
+                headers: {
+                  HttpHeaders.authorizationHeader: FreteeApi.getAccessToken()
+                },
+                fit: BoxFit.cover,
+                errorBuilder: (context, object, stackTrace) =>
+                    const Text("Erro ao recuperar a imagem do usuario"),
+              )),
+        ),
         Expanded(
             child: Container(
           margin: const EdgeInsets.only(left: 10),
@@ -42,7 +53,7 @@ class UsuarioInfo extends StatelessWidget {
                     color: Colors.amber,
                   ),
                   Text(
-                    usuarioInfo["reputacaoUsuario"].toString(),
+                    usuarioInfo["reputacao"].toString(),
                     style: const TextStyle(color: Colors.white, fontSize: 16),
                   )
                 ]),

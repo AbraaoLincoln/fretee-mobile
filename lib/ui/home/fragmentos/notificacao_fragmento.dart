@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:fretee_mobile/business/status_frete.dart';
-import 'package:fretee_mobile/comun/fretee_api.dart';
-import 'package:fretee_mobile/ui/solicitacao_frete/solicitar_servico_info_preco.dart';
+import 'package:fretee_mobile/utils/fretee_api.dart';
+import 'package:fretee_mobile/ui/solicitacao_frete/solicitar_servico_infomar_preco.dart';
 
 class NotificacaoFragmento extends StatefulWidget {
   const NotificacaoFragmento({Key? key}) : super(key: key);
@@ -184,24 +184,45 @@ class _NotificacaoFragmentoState extends State<NotificacaoFragmento> {
           Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => const SolicitarServicoPreco()),
+                builder: (context) => const SolicitarServicoInformarPreco(
+                      freteId: 1,
+                      nomeUsuarioPresadorServico: "fulano",
+                    )),
           );
         });
+      case StatusFrete.solicitacaoCancelada:
+        return _construirNotificacao(
+            "Solicitação Cancelada", Icons.cancel, Colors.red.shade800, () {});
       case StatusFrete.solicitacaoRecusada:
         return _construirNotificacao(
             "Solicitação Recusada", Icons.error, Colors.red.shade800, () {});
       case StatusFrete.precoInformado:
         return _construirNotificacao("Preço Informado", Icons.monetization_on,
             Colors.amber.shade400, () {});
+      case StatusFrete.precoRecusado:
+        return _construirNotificacao("O Preço Informado foi recusado",
+            Icons.error, Colors.red.shade800, () {});
       case StatusFrete.agendado:
         return _construirNotificacao("O frete foi marcado", Icons.check_circle,
             Colors.green.shade500, () {});
       case StatusFrete.cancelado:
         return _construirNotificacao(
-            "Frete cancelado", Icons.error, Colors.red.shade800, () {});
+            "Frete cancelado", Icons.cancel, Colors.red.shade800, () {});
+      case StatusFrete.contratanteFinalizou:
+        return _construirNotificacao(
+            "O Contratante marcou o frete como finalizado",
+            Icons.done,
+            Colors.green.shade500,
+            () {});
+      case StatusFrete.prestadorServicoFinalizou:
+        return _construirNotificacao(
+            "O Pretador de Serviço marcou o frete como finalizado",
+            Icons.done,
+            Colors.green.shade500,
+            () {});
       case StatusFrete.finalizado:
-        return _construirNotificacao("Frete concluido", Icons.check_circle,
-            Colors.green.shade500, () {});
+        return _construirNotificacao(
+            "Frete concluido", Icons.done_all, Colors.green.shade500, () {});
       default:
         return _construirNotificacao(
             "Status não definido", Icons.not_interested, Colors.black, () {});
@@ -218,7 +239,10 @@ class _NotificacaoFragmentoState extends State<NotificacaoFragmento> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => const SolicitarServicoPreco()),
+                    builder: (context) => const SolicitarServicoInformarPreco(
+                          freteId: 1,
+                          nomeUsuarioPresadorServico: "fulano",
+                        )),
               );
             }),
             _construirNotificacao("O frete foi marcado", Icons.check_circle,

@@ -7,7 +7,7 @@ import 'package:fretee_mobile/business/solicitar_servico_info.dart';
 import 'package:http/http.dart' as http;
 import 'package:fretee_mobile/ui/cadastros/cadastro_prestador_servico.dart';
 import 'package:fretee_mobile/ui/cadastros/cadastro_usuario.dart';
-import 'package:fretee_mobile/comun/fretee_api.dart';
+import 'package:fretee_mobile/utils/fretee_api.dart';
 import 'package:fretee_mobile/ui/login/login.dart';
 
 class PerfilFragmento extends StatefulWidget {
