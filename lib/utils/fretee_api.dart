@@ -137,6 +137,10 @@ class FreteeApi {
     return Uri.parse(url + "/frete/$freteId/preco/informar");
   }
 
+  static Uri getUriAceitarPreco(int freteId) {
+    return Uri.parse(url + "/frete/$freteId/preco/aceitar");
+  }
+
   static Uri getUriRecusarPreco(int freteId) {
     return Uri.parse(url + "/frete/$freteId/preco/recusar");
   }

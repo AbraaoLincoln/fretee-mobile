@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 
 import 'package:fretee_mobile/business/status_frete.dart';
 import 'package:fretee_mobile/utils/fretee_api.dart';
-import 'package:fretee_mobile/ui/solicitacao_frete/solicitar_servico_infomar_preco.dart';
+import 'package:fretee_mobile/ui/solicitacao_frete/solicitar_servico_preco.dart';
 
 class NotificacaoFragmento extends StatefulWidget {
   const NotificacaoFragmento({Key? key}) : super(key: key);
@@ -184,9 +184,8 @@ class _NotificacaoFragmentoState extends State<NotificacaoFragmento> {
           Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => const SolicitarServicoInformarPreco(
-                      freteId: 1,
-                      nomeUsuarioPresadorServico: "fulano",
+                builder: (context) => InformaPreco(
+                      freteId: notificacao["id"],
                     )),
           );
         });
@@ -197,8 +196,17 @@ class _NotificacaoFragmentoState extends State<NotificacaoFragmento> {
         return _construirNotificacao(
             "Solicitação Recusada", Icons.error, Colors.red.shade800, () {});
       case StatusFrete.precoInformado:
-        return _construirNotificacao("Preço Informado", Icons.monetization_on,
-            Colors.amber.shade400, () {});
+        return _construirNotificacao(
+            "Preço Informado", Icons.monetization_on, Colors.amber.shade400,
+            () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => AvaliaPreco(
+                      freteId: notificacao["id"],
+                    )),
+          );
+        });
       case StatusFrete.precoRecusado:
         return _construirNotificacao("O Preço Informado foi recusado",
             Icons.error, Colors.red.shade800, () {});
@@ -239,9 +247,8 @@ class _NotificacaoFragmentoState extends State<NotificacaoFragmento> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => const SolicitarServicoInformarPreco(
+                    builder: (context) => const InformaPreco(
                           freteId: 1,
-                          nomeUsuarioPresadorServico: "fulano",
                         )),
               );
             }),

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 class ServicoInfo extends StatelessWidget {
   final Map<String, dynamic> freteInfo;
-  const ServicoInfo({Key? key, required this.freteInfo}) : super(key: key);
+  final bool? showPreco;
+  const ServicoInfo({Key? key, required this.freteInfo, this.showPreco})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -13,29 +15,36 @@ class ServicoInfo extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(10),
       child: Column(
-        children: [
-          _construirTextInfoServico(
-              "Origem", freteInfo["origem"], Icons.location_pin),
-          Divider(
-            height: 20,
-            color: Colors.grey.shade600,
-          ),
-          _construirTextInfoServico(
-              "Destino", freteInfo["destino"], Icons.location_pin),
-          Divider(
-            height: 20,
-            color: Colors.grey.shade600,
-          ),
-          _construirTextDataServico(),
-          Divider(
-            height: 20,
-            color: Colors.grey.shade600,
-          ),
-          _construirTextInfoServico("Descrição da Carga",
-              freteInfo["descricaoCarga"], Icons.library_books_sharp)
-        ],
+        children: _construirInformacoesDoServico(),
       ),
     );
+  }
+
+  List<Widget> _construirInformacoesDoServico() {
+    Widget divider = Divider(
+      height: 20,
+      color: Colors.grey.shade600,
+    );
+    List<Widget> informacoes = [
+      _construirTextInfoServico(
+          "Origem", freteInfo["origem"], Icons.location_pin),
+      divider,
+      _construirTextInfoServico(
+          "Destino", freteInfo["destino"], Icons.location_pin),
+      divider,
+      _construirTextDataServico(),
+      divider,
+      _construirTextInfoServico("Descrição da Carga",
+          freteInfo["descricaoCarga"], Icons.library_books_sharp)
+    ];
+
+    if (showPreco!) {
+      informacoes.add(divider);
+      informacoes.add(_construirTextInfoServico(
+          "Preço", freteInfo["preco"].toString(), Icons.monetization_on));
+    }
+
+    return informacoes;
   }
 
   Widget _construirTextInfoServico(String label, String valor, IconData? icon) {
