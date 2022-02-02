@@ -1,8 +1,21 @@
-import 'package:flutter/material.dart';
-//import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'dart:developer';
+import 'dart:io';
 
-class FretesAgendadosFragmento extends StatelessWidget {
+import 'package:flutter/material.dart';
+import 'package:fretee_mobile/utils/fretee_api.dart';
+import 'package:http/http.dart' as http;
+
+class FretesAgendadosFragmento extends StatefulWidget {
   const FretesAgendadosFragmento({Key? key}) : super(key: key);
+
+  @override
+  _FretesAgendadosFragmentoState createState() =>
+      _FretesAgendadosFragmentoState();
+}
+
+class _FretesAgendadosFragmentoState extends State<FretesAgendadosFragmento> {
+  late List<dynamic> _fretes;
 
   @override
   Widget build(BuildContext context) {
@@ -12,19 +25,87 @@ class FretesAgendadosFragmento extends StatelessWidget {
     );
   }
 
-  Widget _construirListaDeFretesAgendeados() {
-    int qtdFretesAgendados = 1;
+  FutureBuilder<void> _construirListaDeFretesAgendeados() {
+    return FutureBuilder<void>(
+        builder: (context, snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.none:
+            case ConnectionState.waiting:
+              return const Center(
+                child: CircularProgressIndicator(
+                  semanticsLabel: 'Linear progress indicator',
+                ),
+              );
+            default:
+              if (snapshot.hasError) {
+                return const Center(
+                  child: Text(
+                    "Erro",
+                    style: TextStyle(color: Colors.black, fontSize: 25),
+                    textAlign: TextAlign.center,
+                  ),
+                );
+              } else {
+                return GestureDetector(
+                  child: _construirFretesAgendeados(),
+                );
+              }
+          }
+        },
+        future: _getFretes());
+  }
 
-    if (qtdFretesAgendados > 0) {
-      return Column(
-        children: [_proximoFreteDestaque(), ..._proximoFretes()],
-      );
+  Future<void> _getFretes() async {
+    http.Response response;
+
+    do {
+      response = await http.get(FreteeApi.getUriFretesAgendados(), headers: {
+        HttpHeaders.authorizationHeader: FreteeApi.getAccessToken()
+      });
+
+      if (response.statusCode == HttpStatus.forbidden) {
+        FreteeApi.refreshAccessToken(context);
+      }
+    } while (response.statusCode == HttpStatus.forbidden);
+
+    if (response.statusCode == HttpStatus.ok) {
+      _fretes = json.decode(response.body);
     } else {
-      return const Center(child: Text("Nenhum Frete Agendado."));
+      _fretes = [];
+      log("Nao foi possivei recuperar os fretes agendados");
+      log(response.statusCode.toString());
     }
   }
 
-  Widget _proximoFreteDestaque() {
+  Widget _construirFretesAgendeados() {
+    if (_fretes.isNotEmpty) {
+      return Column(
+        children: [_proximoFreteDestaque(_fretes[0]), ..._proximoFretes()],
+      );
+    } else {
+      return Container(
+        //color: Colors.red,
+        height: 600,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Icon(
+              Icons.calendar_today,
+              size: 100,
+            ),
+            Center(
+                child: Text(
+              "Você não tem fretes agendados no momento",
+              style: TextStyle(fontSize: 20),
+              textAlign: TextAlign.center,
+            ))
+          ],
+        ),
+      );
+    }
+  }
+
+  Widget _proximoFreteDestaque(Map<String, dynamic>? frete) {
     return Container(
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
@@ -33,17 +114,17 @@ class FretesAgendadosFragmento extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              _construirTextInfoFrete("Valor", "R\$ ${frete!["preco"]}",
+                  Colors.white70, Colors.white),
               _construirTextInfoFrete(
-                  "Valor", "R\$ 80", Colors.white70, Colors.white),
+                  "Dia", frete["data"], Colors.white70, Colors.white),
               _construirTextInfoFrete(
-                  "Dia", "10/12/2021", Colors.white70, Colors.white),
-              _construirTextInfoFrete(
-                  "Hora", "14:45", Colors.white70, Colors.white)
+                  "Hora", frete["hora"], Colors.white70, Colors.white)
             ],
           ),
-          _construirTextInfoFreteComIcon("Origem", "Rua tal, Natal/RN",
+          _construirTextInfoFreteComIcon("Origem", frete["origem"],
               Colors.white70, Colors.white, Colors.white),
-          _construirTextInfoFreteComIcon("Destino", "Rua ali, Extremoz/RN",
+          _construirTextInfoFreteComIcon("Destino", frete["destino"],
               Colors.white70, Colors.white, Colors.white)
         ]));
   }
@@ -99,15 +180,19 @@ class FretesAgendadosFragmento extends StatelessWidget {
   List<Widget> _proximoFretes() {
     List<Widget> freetsAgendados = [];
 
-    freetsAgendados.add(_proximoFreteNormal());
-    freetsAgendados.add(_proximoFreteNormal());
-    freetsAgendados.add(_proximoFreteNormal());
-    freetsAgendados.add(_proximoFreteNormal());
+    // freetsAgendados.add(_proximoFreteNormal(null));
+    // freetsAgendados.add(_proximoFreteNormal(null));
+    // freetsAgendados.add(_proximoFreteNormal(null));
+    // freetsAgendados.add(_proximoFreteNormal(null));
+
+    for (int i = 1; i < _fretes.length; i++) {
+      freetsAgendados.add(_proximoFreteNormal(_fretes[i]));
+    }
 
     return freetsAgendados;
   }
 
-  Widget _proximoFreteNormal() {
+  Widget _proximoFreteNormal(Map<String, dynamic>? frete) {
     return Container(
         margin: const EdgeInsets.only(top: 20),
         padding: const EdgeInsets.all(10),
@@ -126,17 +211,17 @@ class FretesAgendadosFragmento extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              _construirTextInfoFrete("Valor", "R\$ ${frete!["preco"]}",
+                  Colors.grey.shade600, Colors.black),
               _construirTextInfoFrete(
-                  "Valor", "R\$ 80", Colors.grey.shade600, Colors.black),
+                  "Dia", frete["data"], Colors.grey.shade600, Colors.black),
               _construirTextInfoFrete(
-                  "Dia", "10/12/2021", Colors.grey.shade600, Colors.black),
-              _construirTextInfoFrete(
-                  "Hora", "14:45", Colors.grey.shade600, Colors.black)
+                  "Hora", frete["hora"], Colors.grey.shade600, Colors.black)
             ],
           ),
-          _construirTextInfoFreteComIcon("Origem", "Rua tal, Natal/RN",
+          _construirTextInfoFreteComIcon("Origem", frete["origem"],
               Colors.grey.shade600, Colors.black, Colors.black),
-          _construirTextInfoFreteComIcon("Destino", "Rua ali, Extremoz/RN",
+          _construirTextInfoFreteComIcon("Destino", frete["destino"],
               Colors.grey.shade600, Colors.black, Colors.black)
         ]));
   }

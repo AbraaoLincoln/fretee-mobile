@@ -22,6 +22,7 @@ class FreteeApi {
       "/usuario/firebase/token";
   static const String solicitarServicoUrn = "/frete/solicita-servico/solicitar";
   static const String listaDeNotificaoesUrn = "/frete/notificacao";
+  static const String fretesAgendadosUrn = "/frete/agendados";
   static String accessToken = "";
   static String refreshToken = "";
   static const String bearer = "Bearer ";
@@ -107,6 +108,10 @@ class FreteeApi {
 
   static Uri getUriFreteInfo(int freteId) {
     return Uri.parse(url + "/frete/notificacao/$freteId/info");
+  }
+
+  static Uri getUriFretesAgendados() {
+    return Uri.parse(url + fretesAgendadosUrn);
   }
 
   static Uri getUriSolicitarServico() {
