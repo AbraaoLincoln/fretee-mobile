@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 class MensagemSolicitacaoServico extends StatelessWidget {
   final String nomeUsuario;
-  const MensagemSolicitacaoServico({Key? key, required this.nomeUsuario})
+  final String? message;
+  const MensagemSolicitacaoServico(
+      {Key? key, required this.nomeUsuario, this.message})
       : super(key: key);
 
   @override
@@ -25,7 +27,7 @@ class MensagemSolicitacaoServico extends StatelessWidget {
             ),
           ]),
       child: Text(
-        "Saudações $nomeUsuario, uma nova solicitação de serviço chegou para você, da uma olhada.",
+        message ?? "Ola $nomeUsuario, da uma olhada na notificação.",
         style: const TextStyle(fontSize: 15),
       ),
     );

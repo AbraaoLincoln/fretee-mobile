@@ -191,10 +191,10 @@ class _NotificacaoFragmentoState extends State<NotificacaoFragmento> {
         });
       case StatusFrete.solicitacaoCancelada:
         return _construirNotificacao(
-            "Solicitação Cancelada", Icons.cancel, Colors.red.shade800, () {});
+            "Solicitação Cancelada", Icons.error, Colors.red.shade800, () {});
       case StatusFrete.solicitacaoRecusada:
         return _construirNotificacao(
-            "Solicitação Recusada", Icons.error, Colors.red.shade800, () {});
+            "Solicitação Recusada", Icons.cancel, Colors.red.shade800, () {});
       case StatusFrete.precoInformado:
         return _construirNotificacao(
             "Preço Informado", Icons.monetization_on, Colors.amber.shade400,
@@ -209,7 +209,7 @@ class _NotificacaoFragmentoState extends State<NotificacaoFragmento> {
         });
       case StatusFrete.precoRecusado:
         return _construirNotificacao("O Preço Informado foi recusado",
-            Icons.error, Colors.red.shade800, () {});
+            Icons.cancel, Colors.red.shade800, () {});
       case StatusFrete.agendado:
         return _construirNotificacao("O frete foi marcado", Icons.check_circle,
             Colors.green.shade500, () {});

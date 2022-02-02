@@ -183,14 +183,15 @@ class AvaliaPreco extends StatelessWidget {
     if (visao == Visao.prestadorServico) {
       return Column(
         children: [
-          _getMensagem(freteInfo["prestadorServicoNomeUsuario"]),
+          _getMensagemParaPrestadorServico(
+              freteInfo["prestadorServicoNomeUsuario"]),
           _construirFreteInfo(visao, freteInfo, usuarioInfo)
         ],
       );
     } else {
       return Column(
         children: [
-          _getMensagem(freteInfo["contratanteNomeUsuario"]),
+          _getMensagemParaContratante(freteInfo["contratanteNomeUsuario"]),
           _construirFreteInfo(visao, freteInfo, usuarioInfo),
           _construirBotoes(context)
         ],
@@ -198,8 +199,18 @@ class AvaliaPreco extends StatelessWidget {
     }
   }
 
-  Widget _getMensagem(String nomeUsuario) {
-    return MensagemSolicitacaoServico(nomeUsuario: nomeUsuario);
+  Widget _getMensagemParaPrestadorServico(String nomeUsuario) {
+    return MensagemSolicitacaoServico(
+        nomeUsuario: nomeUsuario,
+        message:
+            "Tudo tranquilo $nomeUsuario ? O preço foi informado, agora só espera pela a avalição do contratante.");
+  }
+
+  Widget _getMensagemParaContratante(String nomeUsuario) {
+    return MensagemSolicitacaoServico(
+        nomeUsuario: nomeUsuario,
+        message:
+            "Opa $nomeUsuario, o preço para a sua solicitação de serviço foi informado.");
   }
 
   Widget _construirFreteInfo(String visao, Map<String, dynamic> freteInfo,
@@ -222,7 +233,13 @@ class AvaliaPreco extends StatelessWidget {
           UsuarioInfo(usuarioInfo: usuarioInfo),
           ServicoInfo(
             freteInfo: freteInfo,
-            showPreco: visao == Visao.contratante,
+            camposAdicionas: [
+              {
+                "label": "Preço",
+                "valor": freteInfo["preco"],
+                "icon": Icons.monetization_on
+              }
+            ],
           )
         ],
       ),
@@ -306,7 +323,8 @@ class _InformaPrecoState extends State<InformaPreco> {
     if (visao == Visao.prestadorServico) {
       return Column(
         children: [
-          _getMensagem(freteInfo["prestadorServicoNomeUsuario"]),
+          _getMensagemParaPrestadorServico(
+              freteInfo["prestadorServicoNomeUsuario"]),
           _construirFreteInfo(visao, freteInfo, usuarioInfo),
           _construirPrecoServico(),
           _construirBotoes(context)
@@ -315,7 +333,7 @@ class _InformaPrecoState extends State<InformaPreco> {
     } else {
       return Column(
         children: [
-          _getMensagem(freteInfo["contratanteNomeUsuario"]),
+          _getMensagemParaContratante(freteInfo["contratanteNomeUsuario"]),
           _construirFreteInfo(visao, freteInfo, usuarioInfo),
           _construirBotaoCancelarSolicitacao(context)
         ],
@@ -323,8 +341,18 @@ class _InformaPrecoState extends State<InformaPreco> {
     }
   }
 
-  Widget _getMensagem(String nomeUsuario) {
-    return MensagemSolicitacaoServico(nomeUsuario: nomeUsuario);
+  Widget _getMensagemParaPrestadorServico(String nomeUsuario) {
+    return MensagemSolicitacaoServico(
+        nomeUsuario: nomeUsuario,
+        message:
+            "Saudações $nomeUsuario, uma nova solicitação de serviço chegou para você, da uma olhada.");
+  }
+
+  Widget _getMensagemParaContratante(String nomeUsuario) {
+    return MensagemSolicitacaoServico(
+        nomeUsuario: nomeUsuario,
+        message:
+            "Eae $nomeUsuario, sua solicitação de serviço foi enviada abaixo você pode ver as informções dela.");
   }
 
   Widget _construirFreteInfo(String visao, Map<String, dynamic> freteInfo,
@@ -345,10 +373,7 @@ class _InformaPrecoState extends State<InformaPreco> {
       child: Column(
         children: [
           UsuarioInfo(usuarioInfo: usuarioInfo),
-          ServicoInfo(
-            freteInfo: freteInfo,
-            showPreco: visao == Visao.contratante,
-          )
+          ServicoInfo(freteInfo: freteInfo)
         ],
       ),
     );

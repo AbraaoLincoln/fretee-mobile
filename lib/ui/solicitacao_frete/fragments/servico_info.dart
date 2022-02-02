@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 class ServicoInfo extends StatelessWidget {
   final Map<String, dynamic> freteInfo;
-  final bool? showPreco;
-  const ServicoInfo({Key? key, required this.freteInfo, this.showPreco})
+  final List<Map<String, dynamic>>? camposAdicionas;
+  const ServicoInfo({Key? key, required this.freteInfo, this.camposAdicionas})
       : super(key: key);
 
   @override
@@ -38,10 +38,12 @@ class ServicoInfo extends StatelessWidget {
           freteInfo["descricaoCarga"], Icons.library_books_sharp)
     ];
 
-    if (showPreco!) {
-      informacoes.add(divider);
-      informacoes.add(_construirTextInfoServico(
-          "Preço", freteInfo["preco"].toString(), Icons.monetization_on));
+    if (camposAdicionas != null && camposAdicionas!.isNotEmpty) {
+      for (var element in camposAdicionas!) {
+        informacoes.add(divider);
+        informacoes.add(_construirTextInfoServico(
+            element["label"], element["valor"].toString(), element["icon"]));
+      }
     }
 
     return informacoes;
