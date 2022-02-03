@@ -6,12 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:fretee_mobile/business/usuario.dart';
 import 'package:fretee_mobile/ui/comun/custom_dialog.dart';
 import 'package:fretee_mobile/ui/comun/visao.dart';
-import 'package:fretee_mobile/ui/solicitacao_frete/fragments/botoes_aceita_recusa.dart';
+import 'package:fretee_mobile/ui/comun/fragments/botoes_aceita_recusa.dart';
 import 'package:fretee_mobile/utils/fretee_api.dart';
 // import 'package:fretee_mobile/utils/placeholders.dart';
-import 'package:fretee_mobile/ui/solicitacao_frete/fragments/mensagem.dart';
-import 'package:fretee_mobile/ui/solicitacao_frete/fragments/servico_info.dart';
-import 'package:fretee_mobile/ui/solicitacao_frete/fragments/usuario_info.dart';
+import 'package:fretee_mobile/ui/comun/fragments/mensagem.dart';
+import 'package:fretee_mobile/ui/comun/fragments/servico_info.dart';
+import 'package:fretee_mobile/ui/comun/fragments/usuario_info.dart';
 import 'package:http/http.dart' as http;
 
 class SolicitarServicoPreco extends StatefulWidget {

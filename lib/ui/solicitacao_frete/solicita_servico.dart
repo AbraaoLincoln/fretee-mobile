@@ -511,8 +511,16 @@ class _FormSolicitacaoServicoState extends State<FormSolicitacaoServico> {
       if (hora.toLowerCase().contains("pm")) {
         List<String> horaPmParts = horaParts[0].split(":");
         int horaPm = int.parse(horaPmParts[0]);
-        if (horaPm > 12) horaPm += 12;
+        if (horaPm != 12) horaPm += 12;
         hora24 = "${horaPm.toString()}:${horaPmParts[1]}";
+      }
+
+      if (hora.toLowerCase().contains("am")) {
+        List<String> horaAmParts = horaParts[0].split(":");
+        int horaAm = int.parse(horaAmParts[0]);
+        if (horaAm < 12) {
+          hora24 = "0${horaAm.toString()}:${horaAmParts[1]}";
+        }
       }
 
       return hora24;

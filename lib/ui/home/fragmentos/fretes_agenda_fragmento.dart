@@ -3,6 +3,9 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:fretee_mobile/business/usuario.dart';
+import 'package:fretee_mobile/ui/comun/visao.dart';
+import 'package:fretee_mobile/ui/info_frete/info_frete.dart';
 import 'package:fretee_mobile/utils/fretee_api.dart';
 import 'package:http/http.dart' as http;
 
@@ -106,27 +109,32 @@ class _FretesAgendadosFragmentoState extends State<FretesAgendadosFragmento> {
   }
 
   Widget _proximoFreteDestaque(Map<String, dynamic>? frete) {
-    return Container(
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10), color: Colors.black),
-        child: Column(children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _construirTextInfoFrete("Valor", "R\$ ${frete!["preco"]}",
-                  Colors.white70, Colors.white),
-              _construirTextInfoFrete(
-                  "Dia", frete["data"], Colors.white70, Colors.white),
-              _construirTextInfoFrete(
-                  "Hora", frete["hora"], Colors.white70, Colors.white)
-            ],
-          ),
-          _construirTextInfoFreteComIcon("Origem", frete["origem"],
-              Colors.white70, Colors.white, Colors.white),
-          _construirTextInfoFreteComIcon("Destino", frete["destino"],
-              Colors.white70, Colors.white, Colors.white)
-        ]));
+    return GestureDetector(
+      child: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10), color: Colors.black),
+          child: Column(children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _construirTextInfoFrete("Valor", "R\$ ${frete!["preco"]}",
+                    Colors.white70, Colors.white),
+                _construirTextInfoFrete(
+                    "Dia", frete["data"], Colors.white70, Colors.white),
+                _construirTextInfoFrete(
+                    "Hora", frete["hora"], Colors.white70, Colors.white)
+              ],
+            ),
+            _construirTextInfoFreteComIcon("Origem", frete["origem"],
+                Colors.white70, Colors.white, Colors.white),
+            _construirTextInfoFreteComIcon("Destino", frete["destino"],
+                Colors.white70, Colors.white, Colors.white)
+          ])),
+      onTap: () {
+        _abrirInfofrete(frete);
+      },
+    );
   }
 
   Widget _construirTextInfoFrete(
@@ -224,5 +232,23 @@ class _FretesAgendadosFragmentoState extends State<FretesAgendadosFragmento> {
           _construirTextInfoFreteComIcon("Destino", frete["destino"],
               Colors.grey.shade600, Colors.black, Colors.black)
         ]));
+  }
+
+  void _abrirInfofrete(Map<String, dynamic>? frete) {
+    if (Usuario.logado.nomeUsuario == frete!["contratanteNomeUsuario"]) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) =>
+                InfoFrete(frete: frete, visao: Visao.contratante)),
+      );
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) =>
+                InfoFrete(frete: frete, visao: Visao.prestadorServico)),
+      );
+    }
   }
 }

@@ -3,12 +3,42 @@ import 'package:flutter/material.dart';
 class ServicoInfo extends StatelessWidget {
   final Map<String, dynamic> freteInfo;
   final List<Map<String, dynamic>>? camposAdicionas;
-  const ServicoInfo({Key? key, required this.freteInfo, this.camposAdicionas})
+  final bool? withShadow;
+  const ServicoInfo(
+      {Key? key,
+      required this.freteInfo,
+      this.camposAdicionas,
+      this.withShadow})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return _getServicoInfo();
+    if (withShadow != null && withShadow!) {
+      return _getServicoInfoComSambra();
+    } else {
+      return _getServicoInfo();
+    }
+  }
+
+  Widget _getServicoInfoComSambra() {
+    return Container(
+      margin: const EdgeInsets.only(top: 20),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 1,
+              blurRadius: 1,
+              offset: const Offset(0, 1), // changes position of shadow
+            ),
+          ]),
+      child: Column(
+        children: _construirInformacoesDoServico(),
+      ),
+    );
   }
 
   Widget _getServicoInfo() {

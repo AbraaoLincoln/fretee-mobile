@@ -20,7 +20,7 @@ class FreteeApi {
   static const String usuarioAtualizarLocalizacaoUrn = "/usuario/localizacao";
   static const String usuarioAtualizarFirebaseTokenUrn =
       "/usuario/firebase/token";
-  static const String solicitarServicoUrn = "/frete/solicita-servico/solicitar";
+  static const String solicitarServicoUrn = "/frete/solicitacao";
   static const String listaDeNotificaoesUrn = "/frete/notificacao";
   static const String fretesAgendadosUrn = "/frete/agendados";
   static String accessToken = "";
@@ -148,5 +148,13 @@ class FreteeApi {
 
   static Uri getUriRecusarPreco(int freteId) {
     return Uri.parse(url + "/frete/$freteId/preco/recusar");
+  }
+
+  static Uri getUriCancelarFrete(int freteId) {
+    return Uri.parse(url + "/frete/$freteId/cancelar");
+  }
+
+  static Uri getUriFinalizarFrete(int freteId) {
+    return Uri.parse(url + "/frete/$freteId/finalizar");
   }
 }

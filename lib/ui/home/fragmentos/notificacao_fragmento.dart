@@ -51,14 +51,21 @@ class _NotificacaoFragmentoState extends State<NotificacaoFragmento> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: const TextStyle(
-                fontSize: 20, color: Colors.black, fontWeight: FontWeight.bold),
+          SizedBox(
+            width: 300,
+            child: Text(
+              label,
+              style: const TextStyle(
+                  fontSize: 20,
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold),
+              overflow: TextOverflow.fade,
+            ),
           ),
           Text(
             valor,
             style: TextStyle(fontSize: 16, color: Colors.grey.shade500),
+            overflow: TextOverflow.clip,
           )
         ],
       ),
