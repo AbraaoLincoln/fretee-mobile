@@ -2,8 +2,10 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:fretee_mobile/business/status_frete.dart';
 import 'package:fretee_mobile/business/veiculo_info.dart';
-import 'package:fretee_mobile/ui/comun/fragments/botoes_aceita_recusa.dart';
+import 'package:fretee_mobile/ui/avaliacao/avaliacao_usuario.dart';
+import 'package:fretee_mobile/ui/comun/custom_dialog.dart';
 import 'package:fretee_mobile/ui/comun/fragments/info_veiculo.dart';
 import 'package:fretee_mobile/ui/comun/fragments/servico_info.dart';
 import 'package:fretee_mobile/ui/comun/fragments/usuario_info.dart';
@@ -16,7 +18,8 @@ import 'dart:convert';
 class InfoFrete extends StatefulWidget {
   final String visao;
   final Map<String, dynamic>? frete;
-  const InfoFrete({Key? key, required this.frete, required this.visao})
+  final int? freteId;
+  const InfoFrete({Key? key, this.frete, required this.visao, this.freteId})
       : super(key: key);
 
   @override
@@ -26,6 +29,7 @@ class InfoFrete extends StatefulWidget {
 class _InfoFreteState extends State<InfoFrete> {
   late String visao;
   Map<String, dynamic>? frete;
+  late final int? freteId;
   Map<String, dynamic>? usuarioInfo;
   final VeiculoInfo _veiculo = VeiculoInfo();
 
@@ -35,6 +39,7 @@ class _InfoFreteState extends State<InfoFrete> {
 
     visao = widget.visao;
     frete = widget.frete;
+    freteId = widget.freteId;
   }
 
   @override
@@ -91,21 +96,25 @@ class _InfoFreteState extends State<InfoFrete> {
           freteInfo: frete!,
           withShadow: true,
         ),
-        _construirBotoesFinalizarECancelar(context)
+        _construirBotoes()
       ]);
     } else {
       return Column(children: [
-        UsuarioInfo(usuarioInfo: frete!["contratanteNomeUsuario"]),
+        UsuarioInfo(usuarioInfo: usuarioInfo!),
         ServicoInfo(
           freteInfo: frete!,
           withShadow: true,
         ),
-        _construirBotoesFinalizarECancelar(context)
+        _construirBotoes()
       ]);
     }
   }
 
   Future<void> _getAdicionaInfo() async {
+    if (frete == null && freteId != null) {
+      frete = await _getFreteInfo(freteId!);
+    }
+
     await _getVeiculoInfo();
 
     if (visao == Visao.contratante) {
@@ -113,6 +122,28 @@ class _InfoFreteState extends State<InfoFrete> {
           await _getUsuarioInfo(frete!["prestadorServicoNomeUsuario"]);
     } else {
       usuarioInfo = await _getUsuarioInfo(frete!["contratanteNomeUsuario"]);
+    }
+  }
+
+  Future<Map<String, dynamic>> _getFreteInfo(int freteId) async {
+    http.Response response;
+
+    do {
+      response = await http.get(FreteeApi.getUriFreteInfo(freteId), headers: {
+        HttpHeaders.authorizationHeader: FreteeApi.getAccessToken()
+      });
+
+      if (response.statusCode == HttpStatus.forbidden) {
+        FreteeApi.refreshAccessToken(context);
+      }
+    } while (response.statusCode == HttpStatus.forbidden);
+
+    if (response.statusCode == HttpStatus.ok) {
+      return json.decode(response.body);
+    } else {
+      log("Nao foi possivel recuperar as informacoes do frete");
+      log(response.statusCode.toString());
+      return {};
     }
   }
 
@@ -169,16 +200,133 @@ class _InfoFreteState extends State<InfoFrete> {
     } while (response.statusCode == HttpStatus.forbidden);
   }
 
+  Widget _construirBotoes() {
+    if (frete!["status"] == StatusFrete.contratanteFinalizou ||
+        frete!["status"] == StatusFrete.prestadorServicoFinalizou) {
+      return _construirBotoesConfirmarENegar(context);
+    } else {
+      return _construirBotoesFinalizarECancelar(context);
+    }
+  }
+
   Widget _construirBotoesFinalizarECancelar(BuildContext context) {
-    return BotoesAceitaRecusar(
-      acceptButtonLabel: "Concluido",
-      acceptCallback: _getAcceptCallback(context),
-      rejectButtonLabel: "Cancelar",
-      rejectCallback: _getRejectCallback(context),
+    return Column(
+      children: [
+        Container(
+          margin: const EdgeInsets.only(top: 20),
+          height: 55,
+          child: TextButton(
+              onPressed: () {
+                showDialog(
+                    context: context,
+                    builder: (context) => MyCustomDialog(
+                          statusCodeSuccess: HttpStatus.ok,
+                          callbackRequest: _getAcceptCallback(),
+                          successHandler: () {
+                            Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      Avaliacao(frete: frete!),
+                                ),
+                                (route) => false);
+                          },
+                        ));
+              },
+              child:
+                  const Text("Frete Concluido", style: TextStyle(fontSize: 20)),
+              style: TextButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  primary: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                  minimumSize: const Size(400, 10))),
+        ),
+        Container(
+          margin: const EdgeInsets.only(top: 20),
+          height: 55,
+          child: TextButton(
+              onPressed: () {
+                showDialog(
+                    context: context,
+                    builder: (context) => MyCustomDialog(
+                          statusCodeSuccess: HttpStatus.ok,
+                          callbackRequest: _getRejectCallback(),
+                        ));
+              },
+              child: const Text("Cancelar", style: TextStyle(fontSize: 20)),
+              style: TextButton.styleFrom(
+                  backgroundColor: Colors.red.shade900,
+                  primary: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                  minimumSize: const Size(400, 10))),
+        )
+      ],
     );
   }
 
-  Future<int> Function() _getAcceptCallback(BuildContext context) {
+  Widget _construirBotoesConfirmarENegar(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          margin: const EdgeInsets.only(top: 20),
+          height: 55,
+          child: TextButton(
+              onPressed: () {
+                showDialog(
+                    context: context,
+                    builder: (context) => MyCustomDialog(
+                          statusCodeSuccess: HttpStatus.ok,
+                          callbackRequest: _getAcceptCallback(),
+                          successHandler: () {
+                            Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      Avaliacao(frete: frete!),
+                                ),
+                                (route) => false);
+                          },
+                        ));
+              },
+              child: const Text("Confirmar", style: TextStyle(fontSize: 20)),
+              style: TextButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  primary: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                  minimumSize: const Size(400, 10))),
+        ),
+        Container(
+          margin: const EdgeInsets.only(top: 20),
+          height: 55,
+          child: TextButton(
+              onPressed: () {
+                showDialog(
+                    context: context,
+                    builder: (context) => MyCustomDialog(
+                          statusCodeSuccess: HttpStatus.ok,
+                          callbackRequest: _getRejectCallback(),
+                        ));
+              },
+              child: const Text("Negar", style: TextStyle(fontSize: 20)),
+              style: TextButton.styleFrom(
+                  backgroundColor: Colors.red.shade900,
+                  primary: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                  minimumSize: const Size(400, 10))),
+        )
+      ],
+    );
+  }
+
+  Future<int> Function() _getAcceptCallback() {
     return () async {
       http.Response response;
 
@@ -197,7 +345,7 @@ class _InfoFreteState extends State<InfoFrete> {
     };
   }
 
-  Future<int> Function() _getRejectCallback(BuildContext context) {
+  Future<int> Function() _getRejectCallback() {
     return () async {
       http.Response response;
 

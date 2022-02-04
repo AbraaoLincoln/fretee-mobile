@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:fretee_mobile/business/usuario.dart';
 import 'package:fretee_mobile/ui/avaliacao/item_avaliacao.dart';
 
 class AvaliacaoUsuario extends StatefulWidget {
@@ -185,5 +186,19 @@ class AvaliacaoPrestadorServico extends StatelessWidget {
       CriterioAvalicao(
           "Valor do Serviço", "O Prestador de Servico cobrou o acordado.")
     ];
+  }
+}
+
+class Avaliacao extends StatelessWidget {
+  final Map<String, dynamic> frete;
+  const Avaliacao({Key? key, required this.frete}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    if (Usuario.logado.nomeUsuario == frete["prestadorServicoNomeUsuario"]) {
+      return const AvaliacaoContratante();
+    } else {
+      return const AvaliacaoPrestadorServico();
+    }
   }
 }

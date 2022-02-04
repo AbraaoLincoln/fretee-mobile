@@ -10,6 +10,7 @@ import 'package:http/http.dart' as http;
 class MyCustomDialog extends StatefulWidget {
   final Future<int> Function() callbackRequest;
   final int statusCodeSuccess;
+  final void Function()? successHandler;
   final String? successMessage;
   final String? erroMessage;
 
@@ -17,6 +18,7 @@ class MyCustomDialog extends StatefulWidget {
       {Key? key,
       required this.callbackRequest,
       required this.statusCodeSuccess,
+      this.successHandler,
       this.successMessage,
       this.erroMessage})
       : super(key: key);
@@ -78,12 +80,16 @@ class _MyCustomDialogState extends State<MyCustomDialog> {
       return _construirResposta(
           widget.successMessage ?? "Operação realizada com sucesso", Icons.send,
           () {
-        Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const Home(),
-            ),
-            (route) => false);
+        if (widget.successHandler != null) {
+          widget.successHandler!();
+        } else {
+          Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const Home(),
+              ),
+              (route) => false);
+        }
       });
     } else {
       return _construirResposta(

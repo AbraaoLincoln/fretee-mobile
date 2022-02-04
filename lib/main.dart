@@ -3,7 +3,7 @@ import 'dart:developer';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:fretee_mobile/ui/avaliacao/avaliacao_contratante.dart';
+import 'package:fretee_mobile/ui/avaliacao/avaliacao_usuario.dart';
 import 'package:fretee_mobile/ui/home/home.dart';
 import 'ui/login/login.dart';
 

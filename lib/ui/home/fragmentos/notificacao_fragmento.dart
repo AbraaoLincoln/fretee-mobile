@@ -3,6 +3,9 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:fretee_mobile/business/usuario.dart';
+import 'package:fretee_mobile/ui/comun/visao.dart';
+import 'package:fretee_mobile/ui/info_frete/info_frete.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:fretee_mobile/business/status_frete.dart';
@@ -224,17 +227,41 @@ class _NotificacaoFragmentoState extends State<NotificacaoFragmento> {
         return _construirNotificacao(
             "Frete cancelado", Icons.cancel, Colors.red.shade800, () {});
       case StatusFrete.contratanteFinalizou:
-        return _construirNotificacao(
-            "O Contratante marcou o frete como finalizado",
-            Icons.done,
-            Colors.green.shade500,
-            () {});
+        if (Usuario.logado.nomeUsuario == notificacao["contratante"]) {
+          return _construirNotificacao("Você marcou o frete como concluido",
+              Icons.done, Colors.green.shade500, () {});
+        } else {
+          return _construirNotificacao(
+              "O Contratante marcou o frete como finalizado",
+              Icons.done,
+              Colors.green.shade500, () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => InfoFrete(
+                      freteId: notificacao["id"],
+                      visao: Visao.prestadorServico),
+                ));
+          });
+        }
       case StatusFrete.prestadorServicoFinalizou:
-        return _construirNotificacao(
-            "O Pretador de Serviço marcou o frete como finalizado",
-            Icons.done,
-            Colors.green.shade500,
-            () {});
+        if (Usuario.logado.nomeUsuario == notificacao["prestadorServico"]) {
+          return _construirNotificacao("Você marcou o frete como concluido",
+              Icons.done, Colors.green.shade500, () {});
+        } else {
+          return _construirNotificacao(
+              "O Prestador de Serviço marcou o frete como finalizado",
+              Icons.done,
+              Colors.green.shade500, () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => InfoFrete(
+                      freteId: notificacao["id"],
+                      visao: Visao.prestadorServico),
+                ));
+          });
+        }
       case StatusFrete.finalizado:
         return _construirNotificacao(
             "Frete concluido", Icons.done_all, Colors.green.shade500, () {});
