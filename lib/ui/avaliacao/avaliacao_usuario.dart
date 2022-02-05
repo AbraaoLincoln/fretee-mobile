@@ -1,14 +1,23 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:fretee_mobile/business/usuario.dart';
 import 'package:fretee_mobile/ui/avaliacao/item_avaliacao.dart';
+import 'package:fretee_mobile/ui/comun/custom_dialog.dart';
+import 'package:fretee_mobile/utils/fretee_api.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class AvaliacaoUsuario extends StatefulWidget {
   final List<CriterioAvalicao> criterios;
   final String usuarioSendoAvaliado;
+  final int freteId;
   const AvaliacaoUsuario(
-      {Key? key, required this.criterios, required this.usuarioSendoAvaliado})
+      {Key? key,
+      required this.criterios,
+      required this.usuarioSendoAvaliado,
+      required this.freteId})
       : super(key: key);
 
   @override
@@ -19,6 +28,8 @@ class _AvaliacaoUsuarioState extends State<AvaliacaoUsuario> {
   late final int numeroDeCriteioDeAvaliacao;
   late final List<CriterioAvalicao> criterios;
   late final String usuarioSendoAvaliado;
+  late final int freteId;
+  double notaFinal = 0;
   Map<String, double> itensDeAvaliacaoNota = {};
 
   @override
@@ -28,6 +39,7 @@ class _AvaliacaoUsuarioState extends State<AvaliacaoUsuario> {
     criterios = widget.criterios;
     usuarioSendoAvaliado = widget.usuarioSendoAvaliado;
     numeroDeCriteioDeAvaliacao = criterios.length;
+    freteId = widget.freteId;
   }
 
   @override
@@ -82,8 +94,14 @@ class _AvaliacaoUsuarioState extends State<AvaliacaoUsuario> {
               log(itensDeAvaliacaoNota[criterio.label].toString());
               somaDasNotas += itensDeAvaliacaoNota[criterio.label] ?? 0;
             }
-            double notaFinal = somaDasNotas / numeroDeCriteioDeAvaliacao;
+            notaFinal = somaDasNotas / numeroDeCriteioDeAvaliacao;
             log("Nota final: ${notaFinal.toStringAsFixed(1)}");
+
+            showDialog(
+                context: context,
+                builder: (context) => MyCustomDialog(
+                    statusCodeSuccess: HttpStatus.ok,
+                    callbackRequest: _getAcceptCallback()));
           },
           child:
               const Text("Concluir Avaliação", style: TextStyle(fontSize: 20)),
@@ -95,6 +113,27 @@ class _AvaliacaoUsuarioState extends State<AvaliacaoUsuario> {
               ),
               minimumSize: const Size(400, 10))),
     );
+  }
+
+  Future<int> Function() _getAcceptCallback() {
+    return () async {
+      http.Response response;
+
+      do {
+        response = await http.put(FreteeApi.getUriFinalizarFrete(freteId),
+            headers: {
+              HttpHeaders.contentTypeHeader: ContentType.json.toString(),
+              HttpHeaders.authorizationHeader: FreteeApi.getAccessToken()
+            },
+            body: json.encode({"freteId": freteId, "nota": notaFinal}));
+
+        if (response.statusCode == HttpStatus.forbidden) {
+          FreteeApi.refreshAccessToken(context);
+        }
+      } while (response.statusCode == HttpStatus.forbidden);
+
+      return response.statusCode;
+    };
   }
 }
 
@@ -146,13 +185,17 @@ class CriterioAvalicao {
 }
 
 class AvaliacaoContratante extends StatelessWidget {
-  const AvaliacaoContratante({Key? key}) : super(key: key);
+  final int freteId;
+  const AvaliacaoContratante({Key? key, required this.freteId})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return AvaliacaoUsuario(
-        criterios: _getCriteirosDeAvaliacao(),
-        usuarioSendoAvaliado: "Contratante");
+      criterios: _getCriteirosDeAvaliacao(),
+      usuarioSendoAvaliado: "Contratante",
+      freteId: freteId,
+    );
   }
 
   List<CriterioAvalicao> _getCriteirosDeAvaliacao() {
@@ -166,13 +209,17 @@ class AvaliacaoContratante extends StatelessWidget {
 }
 
 class AvaliacaoPrestadorServico extends StatelessWidget {
-  const AvaliacaoPrestadorServico({Key? key}) : super(key: key);
+  final int freteId;
+  const AvaliacaoPrestadorServico({Key? key, required this.freteId})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return AvaliacaoUsuario(
-        criterios: _getCriteirosDeAvaliacao(),
-        usuarioSendoAvaliado: "Prestador de Servico");
+      criterios: _getCriteirosDeAvaliacao(),
+      usuarioSendoAvaliado: "Prestador de Servico",
+      freteId: freteId,
+    );
   }
 
   List<CriterioAvalicao> _getCriteirosDeAvaliacao() {
@@ -196,9 +243,9 @@ class Avaliacao extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (Usuario.logado.nomeUsuario == frete["prestadorServicoNomeUsuario"]) {
-      return const AvaliacaoContratante();
+      return AvaliacaoContratante(freteId: frete["id"]);
     } else {
-      return const AvaliacaoPrestadorServico();
+      return AvaliacaoPrestadorServico(freteId: frete["id"]);
     }
   }
 }

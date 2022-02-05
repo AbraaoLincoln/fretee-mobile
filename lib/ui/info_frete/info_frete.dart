@@ -217,21 +217,12 @@ class _InfoFreteState extends State<InfoFrete> {
           height: 55,
           child: TextButton(
               onPressed: () {
-                showDialog(
-                    context: context,
-                    builder: (context) => MyCustomDialog(
-                          statusCodeSuccess: HttpStatus.ok,
-                          callbackRequest: _getAcceptCallback(),
-                          successHandler: () {
-                            Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      Avaliacao(frete: frete!),
-                                ),
-                                (route) => false);
-                          },
-                        ));
+                Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Avaliacao(frete: frete!),
+                    ),
+                    (route) => false);
               },
               child:
                   const Text("Frete Concluido", style: TextStyle(fontSize: 20)),
@@ -276,21 +267,12 @@ class _InfoFreteState extends State<InfoFrete> {
           height: 55,
           child: TextButton(
               onPressed: () {
-                showDialog(
-                    context: context,
-                    builder: (context) => MyCustomDialog(
-                          statusCodeSuccess: HttpStatus.ok,
-                          callbackRequest: _getAcceptCallback(),
-                          successHandler: () {
-                            Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      Avaliacao(frete: frete!),
-                                ),
-                                (route) => false);
-                          },
-                        ));
+                Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Avaliacao(frete: frete!),
+                    ),
+                    (route) => false);
               },
               child: const Text("Confirmar", style: TextStyle(fontSize: 20)),
               style: TextButton.styleFrom(

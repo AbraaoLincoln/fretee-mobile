@@ -77,8 +77,12 @@ class _PerfilFragmentoState extends State<PerfilFragmento> {
       child: Row(
         //mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _contruirMaisInfoUsuario("Reputacao",
-              _userInfo!["reputacao"].toString(), Icons.star, Colors.amber, 3),
+          _contruirMaisInfoUsuario(
+              "Reputacao",
+              _userInfo!["reputacao"].toStringAsFixed(1),
+              Icons.star,
+              Colors.amber,
+              3),
           _contruirMaisInfoUsuario(
               "Usa o app desde",
               _userInfo!["dataCriacao"] ?? "99/99/9999",
@@ -87,7 +91,7 @@ class _PerfilFragmentoState extends State<PerfilFragmento> {
               20),
           _contruirMaisInfoUsuario(
               "Fretes",
-              _userInfo!["fretesRealizados"].toString(),
+              _userInfo!["numeroDeFretesContratados"].toString(),
               Icons.library_add_check_sharp,
               Colors.green.shade900,
               30)
