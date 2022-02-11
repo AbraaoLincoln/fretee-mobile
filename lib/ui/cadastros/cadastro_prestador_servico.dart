@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:fretee_mobile/business/device_location.dart';
+import 'package:fretee_mobile/ui/comun/modo_formulario.dart';
 import 'package:fretee_mobile/utils/fretee_api.dart';
 import 'package:fretee_mobile/business/usuario.dart';
 import 'package:fretee_mobile/ui/home/fragmentos/perfil_fragmento.dart';
@@ -12,7 +13,19 @@ import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 
 class CadastroPrestadorServico extends StatefulWidget {
-  const CadastroPrestadorServico({Key? key}) : super(key: key);
+  final String? initValueLargura;
+  final String? initValueAltura;
+  final String? initValueComprimento;
+  final Image? initImage;
+  final ModoFormulario modoFormulario;
+  const CadastroPrestadorServico(
+      {Key? key,
+      this.initValueLargura,
+      this.initValueAltura,
+      this.initValueComprimento,
+      this.initImage,
+      required this.modoFormulario})
+      : super(key: key);
 
   @override
   _CadastroPrestadorServicoState createState() =>
@@ -27,15 +40,37 @@ class _CadastroPrestadorServicoState extends State<CadastroPrestadorServico> {
   final _placaTextControlle = TextEditingController();
   String _msgFotoNaoSelecionada = "";
   Color _borberColorImagePicker = Colors.grey.shade400;
+  late String _buttonLabel;
+  late String _msg;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   late MyDialog _myDialog;
 
   @override
+  void initState() {
+    super.initState();
+
+    _larguraTextControlle.text = widget.initValueLargura ?? "";
+    _alturaTextControlle.text = widget.initValueAltura ?? "";
+    _comprimentoTextControlle.text = widget.initValueComprimento ?? "";
+
+    if (widget.modoFormulario == ModoFormulario.cadastro) {
+      _msg =
+          "Para se cadastrar como prestador de serviço precisamos das informações do seu veiculo.";
+      _buttonLabel = "Cadastrar";
+    }
+
+    if (widget.modoFormulario == ModoFormulario.edicao) {
+      _msg = "Abaixo você pode editar as informações do seu veiculo";
+      _buttonLabel = "Salvar Edição";
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Cadastro Prestador Serviço"),
+        title: const Text("Prestador Serviço"),
         backgroundColor: Colors.black,
       ),
       body: SingleChildScrollView(
@@ -44,8 +79,8 @@ class _CadastroPrestadorServicoState extends State<CadastroPrestadorServico> {
           children: [
             Container(
               padding: const EdgeInsets.all(10),
-              child: const Text(
-                "Para se cadastrar como prestador de serviço precisamos das informações do seu veiculo.",
+              child: Text(
+                _msg,
                 style: TextStyle(fontSize: 17),
               ),
               decoration: BoxDecoration(
@@ -85,17 +120,7 @@ class _CadastroPrestadorServicoState extends State<CadastroPrestadorServico> {
                 padding: const EdgeInsets.fromLTRB(20, 10, 10, 10),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8.0),
-                  child: _image != null
-                      ? Image.file(
-                          _image!,
-                          width: 100,
-                          height: 80,
-                          fit: BoxFit.cover,
-                        )
-                      : const Icon(
-                          Icons.image,
-                          size: 80,
-                        ),
+                  child: _getRightImage(),
                 ),
               ),
               Container(
@@ -140,13 +165,31 @@ class _CadastroPrestadorServicoState extends State<CadastroPrestadorServico> {
     );
   }
 
+  Widget _getRightImage() {
+    if (_image != null) {
+      return Image.file(
+        _image!,
+        width: 100,
+        height: 80,
+        fit: BoxFit.cover,
+      );
+    }
+
+    if (widget.initImage != null) return widget.initImage!;
+
+    return const Icon(
+      Icons.image,
+      size: 80,
+    );
+  }
+
   Future selecionarImagemDaGaleria() async {
     try {
       final imagem = await ImagePicker().pickImage(source: ImageSource.gallery);
       if (imagem == null) return;
       final imageFile = File(imagem.path);
       setState(() {
-        this._image = imageFile;
+        _image = imageFile;
         _msgFotoNaoSelecionada = "";
         _borberColorImagePicker = Colors.grey.shade400;
       });
@@ -174,12 +217,18 @@ class _CadastroPrestadorServicoState extends State<CadastroPrestadorServico> {
                 margin: const EdgeInsets.only(top: 20),
                 child: TextButton(
                     onPressed: () {
-                      bool validateSuccessful = _validateImageAndForm();
-                      if (validateSuccessful) _cadastrarComoPrestadorServico();
+                      if (widget.modoFormulario == ModoFormulario.cadastro) {
+                        bool validateSuccessful = _validateImageAndForm();
+                        if (validateSuccessful) {
+                          _cadastrarComoPrestadorServico();
+                        }
+                      }
+
+                      if (widget.modoFormulario == ModoFormulario.edicao) {}
                     },
-                    child: const Text(
-                      "Cadastrar",
-                      style: TextStyle(fontSize: 20),
+                    child: Text(
+                      _buttonLabel,
+                      style: const TextStyle(fontSize: 20),
                     ),
                     style: TextButton.styleFrom(
                         backgroundColor: Colors.black,
@@ -188,7 +237,7 @@ class _CadastroPrestadorServicoState extends State<CadastroPrestadorServico> {
                           borderRadius: BorderRadius.circular(50),
                         ),
                         // elevation: 15.0,
-                        minimumSize: Size(100, 50))),
+                        minimumSize: const Size(100, 50))),
               )
             ],
           ),

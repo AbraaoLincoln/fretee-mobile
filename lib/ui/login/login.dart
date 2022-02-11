@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:fretee_mobile/ui/comun/modo_formulario.dart';
 import 'package:fretee_mobile/utils/fretee_api.dart';
 import 'package:fretee_mobile/utils/http_utils.dart';
 import 'package:fretee_mobile/business/usuario.dart';
@@ -121,7 +122,9 @@ class _LoginState extends State<Login> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const CadastroUsuario()),
+                            builder: (context) => const CadastroUsuario(
+                                  modoFormulario: ModoFormulario.cadastro,
+                                )),
                       );
                     },
                     child: const Text("Cadastra-se",

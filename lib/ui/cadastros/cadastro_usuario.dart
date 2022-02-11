@@ -3,13 +3,26 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fretee_mobile/ui/comun/modo_formulario.dart';
 import 'package:fretee_mobile/utils/fretee_api.dart';
 import 'package:fretee_mobile/ui/login/login.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 
 class CadastroUsuario extends StatefulWidget {
-  const CadastroUsuario({Key? key}) : super(key: key);
+  final ModoFormulario modoFormulario;
+  final String? initNomeCompleto;
+  final String? initTelefone;
+  final String? initNomeUsuario;
+  final Image? initImage;
+  const CadastroUsuario(
+      {Key? key,
+      required this.modoFormulario,
+      this.initImage,
+      this.initNomeCompleto,
+      this.initTelefone,
+      this.initNomeUsuario})
+      : super(key: key);
 
   @override
   _CadastroUsuarioState createState() => _CadastroUsuarioState();
@@ -24,14 +37,32 @@ class _CadastroUsuarioState extends State<CadastroUsuario> {
   String? _erroMsg;
   String _msgFotoNaoSelecionada = "";
   Color _borberColorImagePicker = Colors.grey.shade400;
-  GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   late MyDialog _myDialog;
+  late String _buttonLabel;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _nomeCompletoTextControlle.text = widget.initNomeCompleto ?? "";
+    _telefoneTextControlle.text = widget.initTelefone ?? "";
+    _nomeUsuarioTextControlle.text = widget.initNomeUsuario ?? "";
+
+    if (widget.modoFormulario == ModoFormulario.cadastro) {
+      _buttonLabel = "Cadastrar";
+    }
+
+    if (widget.modoFormulario == ModoFormulario.edicao) {
+      _buttonLabel = "Salvar";
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Cadastra-se"),
+        title: const Text("Usuario"),
         backgroundColor: Colors.black,
       ),
       body: SingleChildScrollView(
@@ -61,17 +92,7 @@ class _CadastroUsuarioState extends State<CadastroUsuario> {
                 padding: const EdgeInsets.all(10),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8.0),
-                  child: _image != null
-                      ? Image.file(
-                          _image!,
-                          width: 100,
-                          height: 80,
-                          fit: BoxFit.cover,
-                        )
-                      : const Icon(
-                          Icons.image,
-                          size: 80,
-                        ),
+                  child: _getRightImage(),
                 ),
               ),
               Container(
@@ -116,6 +137,24 @@ class _CadastroUsuarioState extends State<CadastroUsuario> {
     );
   }
 
+  Widget _getRightImage() {
+    if (_image != null) {
+      return Image.file(
+        _image!,
+        width: 100,
+        height: 80,
+        fit: BoxFit.cover,
+      );
+    }
+
+    if (widget.initImage != null) return widget.initImage!;
+
+    return const Icon(
+      Icons.image,
+      size: 80,
+    );
+  }
+
   Future selecionarImagemDaGaleria() async {
     try {
       final imagem = await ImagePicker().pickImage(source: ImageSource.gallery);
@@ -132,41 +171,102 @@ class _CadastroUsuarioState extends State<CadastroUsuario> {
   }
 
   Widget _ConstruirformularioDeCadastro() {
-    return Container(
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _ConstruirInputDoFormulatio("Nome Completo",
-                _nomeCompletoTextControlle, TextInputType.text, false, false),
-            _ConstruirInputDoFormulatio("Telefone", _telefoneTextControlle,
-                TextInputType.number, false, false),
-            _ConstruirInputDoFormulatio("Nome de Usuario",
-                _nomeUsuarioTextControlle, TextInputType.text, false, true),
-            _ConstruirInputDoFormulatio(
-                "Senha", _senhaTextControlle, TextInputType.text, true, false),
-            Container(
-              margin: const EdgeInsets.only(top: 20),
-              child: TextButton(
-                  onPressed: _cadastrarUsuario,
-                  child: const Text(
-                    "Cadastrar",
-                    style: TextStyle(fontSize: 20),
-                  ),
-                  style: TextButton.styleFrom(
-                      backgroundColor: Colors.black,
-                      primary: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(50),
-                      ),
-                      // elevation: 15.0,
-                      minimumSize: const Size(100, 50))),
-            )
-          ],
-        ),
+    List<Widget> camposFormulario = [
+      _ConstruirInputDoFormulatio("Nome Completo", _nomeCompletoTextControlle,
+          TextInputType.text, false, false),
+      _ConstruirInputDoFormulatio("Telefone", _telefoneTextControlle,
+          TextInputType.number, false, false),
+      _ConstruirInputDoFormulatio("Nome de Usuario", _nomeUsuarioTextControlle,
+          TextInputType.text, false, true),
+    ];
+
+    if (widget.modoFormulario == ModoFormulario.cadastro) {
+      camposFormulario.add(_ConstruirInputDoFormulatio(
+          "Senha", _senhaTextControlle, TextInputType.text, true, false));
+    }
+
+    camposFormulario.add(_construirBotoes());
+
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: camposFormulario,
       ),
     );
+  }
+
+  Widget _construirBotoes() {
+    if (widget.modoFormulario == ModoFormulario.cadastro) {
+      return Container(
+        margin: const EdgeInsets.only(top: 20),
+        child: TextButton(
+            onPressed: _cadastrarUsuario,
+            child: const Text(
+              "Cadastrar",
+              style: TextStyle(fontSize: 20),
+            ),
+            style: TextButton.styleFrom(
+                backgroundColor: Colors.black,
+                primary: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                minimumSize: const Size(100, 50))),
+      );
+    } else if (widget.modoFormulario == ModoFormulario.edicao) {
+      return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Container(
+          margin: const EdgeInsets.only(top: 20),
+          child: TextButton(
+              onPressed: () {},
+              child: const Text(
+                "Salvar",
+                style: TextStyle(fontSize: 20),
+              ),
+              style: TextButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  primary: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                  minimumSize: const Size(100, 50))),
+        ),
+        Container(
+          margin: const EdgeInsets.only(top: 20),
+          child: TextButton(
+              onPressed: () {},
+              child: const Text(
+                "Alterar senha",
+                style: TextStyle(fontSize: 20),
+              ),
+              style: TextButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  primary: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                  minimumSize: const Size(100, 50))),
+        )
+      ]);
+    } else {
+      return Container(
+        margin: const EdgeInsets.only(top: 20),
+        child: TextButton(
+            onPressed: () {},
+            child: const Text(
+              "Sem ação",
+              style: TextStyle(fontSize: 20),
+            ),
+            style: TextButton.styleFrom(
+                backgroundColor: Colors.black,
+                primary: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                minimumSize: const Size(100, 50))),
+      );
+    }
   }
 
   Widget _ConstruirInputDoFormulatio(

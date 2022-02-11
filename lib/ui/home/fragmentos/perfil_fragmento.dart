@@ -4,6 +4,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:fretee_mobile/business/solicitar_servico_info.dart';
+import 'package:fretee_mobile/business/usuario.dart';
+import 'package:fretee_mobile/ui/comun/modo_formulario.dart';
 import 'package:http/http.dart' as http;
 import 'package:fretee_mobile/ui/cadastros/cadastro_prestador_servico.dart';
 import 'package:fretee_mobile/ui/cadastros/cadastro_usuario.dart';
@@ -19,15 +21,46 @@ class PerfilFragmento extends StatefulWidget {
 
 class _PerfilFragmentoState extends State<PerfilFragmento> {
   Map<String, dynamic>? _userInfo;
+  Image? _usuarioLogadoImage;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(10),
-      child: Column(
-        children: [_construirUsuarioInfo(), _construirMenuConfig()],
-      ),
+      child: _construirPerfilInfo(),
     );
+  }
+
+  FutureBuilder<void> _construirPerfilInfo() {
+    return FutureBuilder<void>(
+        builder: (context, snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.none:
+            case ConnectionState.waiting:
+              return const SizedBox(
+                  height: 180,
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      semanticsLabel: 'Linear progress indicator',
+                    ),
+                  ));
+            default:
+              if (snapshot.hasError) {
+                return const Center(
+                  child: Text(
+                    "Erro ao carregar informações do usuario",
+                    style: TextStyle(color: Colors.black, fontSize: 25),
+                    textAlign: TextAlign.center,
+                  ),
+                );
+              } else {
+                return Column(
+                  children: [_construirUsuarioInfo(), _construirMenuConfig()],
+                );
+              }
+          }
+        },
+        future: _getUsuarioInfo());
   }
 
   Widget _construirUsuarioInfo() {
@@ -44,7 +77,9 @@ class _PerfilFragmentoState extends State<PerfilFragmento> {
               offset: const Offset(0, 1), // changes position of shadow
             ),
           ]),
-      child: _construirUsuarioInfoWhenReady(),
+      child: Column(
+        children: [_getUsuario(), _maisInfoUsuario()],
+      ),
     );
   }
 
@@ -52,16 +87,7 @@ class _PerfilFragmentoState extends State<PerfilFragmento> {
     return Column(
       children: [
         ClipRRect(
-            borderRadius: BorderRadius.circular(50),
-            child: Image.network(FreteeApi.getUriUsuarioFoto(),
-                headers: {
-                  HttpHeaders.authorizationHeader: FreteeApi.getAccessToken()
-                },
-                fit: BoxFit.cover,
-                width: 100,
-                height: 100,
-                errorBuilder: (context, object, stackTrace) =>
-                    const Text("Erro ao recuperar a imagem do usuario"))),
+            borderRadius: BorderRadius.circular(50), child: _getUsuarioImage()),
         Text(
           _userInfo!["nomeCompleto"] ?? "Nome nao informado",
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
@@ -69,6 +95,17 @@ class _PerfilFragmentoState extends State<PerfilFragmento> {
         )
       ],
     );
+  }
+
+  Widget _getUsuarioImage() {
+    _usuarioLogadoImage = Image.network(FreteeApi.getUriUsuarioFoto(),
+        headers: {HttpHeaders.authorizationHeader: FreteeApi.getAccessToken()},
+        fit: BoxFit.cover,
+        width: 100,
+        height: 100,
+        errorBuilder: (context, object, stackTrace) =>
+            const Text("Erro ao recuperar a imagem do usuario"));
+    return _usuarioLogadoImage!;
   }
 
   Widget _maisInfoUsuario() {
@@ -131,14 +168,37 @@ class _PerfilFragmentoState extends State<PerfilFragmento> {
     return Container(
         margin: const EdgeInsets.only(top: 20),
         child: Row(
-          children: [
-            _ContruirInfoPrestadorServico(),
-            _ContruirItemMenuPerfil()
-          ],
+          children: [_getInfoPrestadorServico(), _ContruirItemMenuPerfil()],
         ));
   }
 
-  Widget _ContruirInfoPrestadorServico() {
+  Widget _getInfoPrestadorServico() {
+    if (_userInfo!["prestadorServico"] == null) {
+      return _ContruirInfoPrestadorServico(
+          "Cadastra-se como \n Prestador de Serviço", "Cadastra-se", () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => const CadastroPrestadorServico(
+                    modoFormulario: ModoFormulario.cadastro,
+                  )),
+        );
+      });
+    } else {
+      return _ContruirInfoPrestadorServico(
+          "Editar informações \n do veiculo", "Editar", () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => FormularioEdicaoVeiculo(
+                  nomeUsuario: Usuario.logado.nomeUsuario)),
+        );
+      });
+    }
+  }
+
+  Widget _ContruirInfoPrestadorServico(
+      String label, String buttonLabel, void Function() onPressed) {
     return Container(
       margin: const EdgeInsets.only(right: 10),
       padding: const EdgeInsets.all(10),
@@ -158,22 +218,16 @@ class _PerfilFragmentoState extends State<PerfilFragmento> {
           ),
           Container(
             margin: const EdgeInsets.only(top: 10, bottom: 10),
-            child: const Text("Cadastra-se como \n Prestador de Serviço",
+            child: Text(label,
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 20)),
           ),
           TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const CadastroPrestadorServico()),
-                );
-              },
-              child: const Text("Cadastra-se"),
+              onPressed: onPressed,
+              child: Text(buttonLabel),
               style: TextButton.styleFrom(
                   backgroundColor: Colors.grey.shade800,
                   primary: Colors.white,
@@ -193,7 +247,11 @@ class _PerfilFragmentoState extends State<PerfilFragmento> {
         _ContruirItemMenu("Editar Informações", "Editar", Icons.edit, () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const CadastroUsuario()),
+            MaterialPageRoute(
+                builder: (context) => FormularioEdicaoUsuarioInfo(
+                      usuarioLogadoInfo: _userInfo!,
+                      usuarioLogadoImage: _usuarioLogadoImage!,
+                    )),
           );
         }, 145, 10),
         _ContruirItemMenu("Sair do App", "Sair", Icons.logout, () {
@@ -255,38 +313,6 @@ class _PerfilFragmentoState extends State<PerfilFragmento> {
     );
   }
 
-  FutureBuilder<void> _construirUsuarioInfoWhenReady() {
-    return FutureBuilder<void>(
-        builder: (context, snapshot) {
-          switch (snapshot.connectionState) {
-            case ConnectionState.none:
-            case ConnectionState.waiting:
-              return const SizedBox(
-                  height: 180,
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      semanticsLabel: 'Linear progress indicator',
-                    ),
-                  ));
-            default:
-              if (snapshot.hasError) {
-                return const Center(
-                  child: Text(
-                    "Erro ao carregar informações do usuario",
-                    style: TextStyle(color: Colors.black, fontSize: 25),
-                    textAlign: TextAlign.center,
-                  ),
-                );
-              } else {
-                return Column(
-                  children: [_getUsuario(), _maisInfoUsuario()],
-                );
-              }
-          }
-        },
-        future: _getUsuarioInfo());
-  }
-
   Future<void> _getUsuarioInfo() async {
     var response = await http.get(FreteeApi.getUriUsuarioInfo(),
         headers: {HttpHeaders.authorizationHeader: FreteeApi.getAccessToken()});
@@ -313,5 +339,109 @@ class _PerfilFragmentoState extends State<PerfilFragmento> {
     userInfoTemp["fretesRealizados"] = "0";
 
     return userInfoTemp;
+  }
+}
+
+class FormularioEdicaoVeiculo extends StatefulWidget {
+  final String nomeUsuario;
+  const FormularioEdicaoVeiculo({Key? key, required this.nomeUsuario})
+      : super(key: key);
+
+  @override
+  _FormularioEdicaoVeiculoState createState() =>
+      _FormularioEdicaoVeiculoState();
+}
+
+class _FormularioEdicaoVeiculoState extends State<FormularioEdicaoVeiculo> {
+  Map<String, dynamic> _veiculoInfo = {};
+  @override
+  Widget build(BuildContext context) {
+    return _construirPerfilInfo();
+  }
+
+  FutureBuilder<void> _construirPerfilInfo() {
+    return FutureBuilder<void>(
+        builder: (context, snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.none:
+            case ConnectionState.waiting:
+              return const SizedBox(
+                  height: 180,
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      semanticsLabel: 'Linear progress indicator',
+                    ),
+                  ));
+            default:
+              if (snapshot.hasError) {
+                return const Center(
+                  child: Text(
+                    "Erro ao carregar informações do usuario",
+                    style: TextStyle(color: Colors.black, fontSize: 25),
+                    textAlign: TextAlign.center,
+                  ),
+                );
+              } else {
+                return CadastroPrestadorServico(
+                  modoFormulario: ModoFormulario.edicao,
+                  initValueLargura: _veiculoInfo["largura"].toString(),
+                  initValueAltura: _veiculoInfo["altura"].toString(),
+                  initValueComprimento: _veiculoInfo["comprimento"].toString(),
+                  initImage: Image.network(
+                    FreteeApi.getUriPrestadoresServicoFotoVeiculo(
+                        Usuario.logado.nomeUsuario),
+                    headers: {
+                      HttpHeaders.authorizationHeader:
+                          FreteeApi.getAccessToken()
+                    },
+                    fit: BoxFit.cover,
+                    width: 100,
+                    height: 80,
+                    errorBuilder: (context, object, stackTrace) =>
+                        const Text("Erro ao recuperar a imagem do usuario"),
+                  ),
+                );
+              }
+          }
+        },
+        future: _getVeiculoInfo());
+  }
+
+  Future<void> _getVeiculoInfo() async {
+    var response = await http.get(
+        FreteeApi.getUriPrestadoresServicoVeiculoInfo(
+            Usuario.logado.nomeUsuario),
+        headers: {HttpHeaders.authorizationHeader: FreteeApi.getAccessToken()});
+
+    switch (response.statusCode) {
+      case HttpStatus.ok:
+        _veiculoInfo = await json.decode(response.body);
+        break;
+      default:
+        log("Nao foi possivel recuperar os dados do veiculo");
+        log(response.statusCode.toString());
+        _veiculoInfo = {};
+    }
+  }
+}
+
+class FormularioEdicaoUsuarioInfo extends StatelessWidget {
+  final Map<String, dynamic> usuarioLogadoInfo;
+  final Image usuarioLogadoImage;
+  const FormularioEdicaoUsuarioInfo(
+      {Key? key,
+      required this.usuarioLogadoInfo,
+      required this.usuarioLogadoImage})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return CadastroUsuario(
+      modoFormulario: ModoFormulario.edicao,
+      initImage: usuarioLogadoImage,
+      initNomeCompleto: usuarioLogadoInfo["nomeCompleto"],
+      initTelefone: usuarioLogadoInfo["telefone"],
+      initNomeUsuario: usuarioLogadoInfo["nomeUsuario"],
+    );
   }
 }

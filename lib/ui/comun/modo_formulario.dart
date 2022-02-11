@@ -1,0 +1,1 @@
+enum ModoFormulario { cadastro, edicao }
