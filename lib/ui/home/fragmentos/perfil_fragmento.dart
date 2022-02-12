@@ -438,12 +438,14 @@ class FormularioEdicaoUsuarioInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    log(usuarioLogadoInfo["id"].toString());
     return CadastroUsuario(
       modoFormulario: ModoFormulario.edicao,
       initImage: usuarioLogadoImage,
       initNomeCompleto: usuarioLogadoInfo["nomeCompleto"],
       initTelefone: usuarioLogadoInfo["telefone"],
       initNomeUsuario: usuarioLogadoInfo["nomeUsuario"],
+      usuarioId: usuarioLogadoInfo["id"],
     );
   }
 }

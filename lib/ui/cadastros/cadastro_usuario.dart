@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fretee_mobile/ui/comun/modo_formulario.dart';
+import 'package:fretee_mobile/ui/home/fragmentos/perfil_fragmento.dart';
+import 'package:fretee_mobile/ui/home/home.dart';
 import 'package:fretee_mobile/utils/fretee_api.dart';
 import 'package:fretee_mobile/ui/login/login.dart';
 import 'package:image_picker/image_picker.dart';
@@ -15,13 +17,15 @@ class CadastroUsuario extends StatefulWidget {
   final String? initTelefone;
   final String? initNomeUsuario;
   final Image? initImage;
+  final int? usuarioId;
   const CadastroUsuario(
       {Key? key,
       required this.modoFormulario,
       this.initImage,
       this.initNomeCompleto,
       this.initTelefone,
-      this.initNomeUsuario})
+      this.initNomeUsuario,
+      this.usuarioId})
       : super(key: key);
 
   @override
@@ -219,7 +223,7 @@ class _CadastroUsuarioState extends State<CadastroUsuario> {
         Container(
           margin: const EdgeInsets.only(top: 20),
           child: TextButton(
-              onPressed: () {},
+              onPressed: _atualizarInfoUsuario,
               child: const Text(
                 "Salvar",
                 style: TextStyle(fontSize: 20),
@@ -291,7 +295,7 @@ class _CadastroUsuarioState extends State<CadastroUsuario> {
           controller: controller,
           validator: (value) {
             if (value!.isEmpty) {
-              return "Insira o/a ${label}";
+              return "Insira o/a $label";
             }
           },
           obscureText: obscureText,
@@ -300,25 +304,48 @@ class _CadastroUsuarioState extends State<CadastroUsuario> {
     );
   }
 
-  void _cadastrarUsuario() async {
+  void _cadastrarUsuario() {
     if (!validateImageAndForm()) return;
     _showCadastrandoDialog();
+    _fazerRequestComBaseNoModoDoFormulario();
+  }
 
-    var request =
-        http.MultipartRequest("POST", FreteeApi.getUriCadastrarUsuario());
+  void _atualizarInfoUsuario() {
+    if (!_validateForm()) return;
+    _showCadastrandoDialog();
+    _fazerRequestComBaseNoModoDoFormulario();
+  }
+
+  void _fazerRequestComBaseNoModoDoFormulario() async {
+    http.MultipartRequest request;
+    if (widget.modoFormulario == ModoFormulario.cadastro) {
+      request =
+          http.MultipartRequest("POST", FreteeApi.getUriCadastrarUsuario());
+      request.fields["senha"] = _senhaTextControlle.text;
+    } else {
+      request = http.MultipartRequest(
+          "PUT", FreteeApi.getUriAtualizarUsuarioInfo(widget.usuarioId!));
+      request.headers[HttpHeaders.authorizationHeader] =
+          FreteeApi.getAccessToken();
+    }
 
     request.fields["nomeCompleto"] = _nomeCompletoTextControlle.text;
     request.fields["telefone"] = _telefoneTextControlle.text;
     request.fields["nomeAutenticacao"] = _nomeUsuarioTextControlle.text;
-    request.fields["senha"] = _senhaTextControlle.text;
 
-    var imageUsuario = await http.MultipartFile.fromPath("foto", _image!.path);
-
-    request.files.add(imageUsuario);
+    if (_image != null) {
+      var imageUsuario =
+          await http.MultipartFile.fromPath("foto", _image!.path);
+      request.files.add(imageUsuario);
+    }
 
     var response = await request.send();
 
     switch (response.statusCode) {
+      case HttpStatus.ok:
+        log("Informacoes do usuario atualizadas com sucesso");
+        _myDialog.showRes(response.statusCode);
+        break;
       case HttpStatus.created:
         log("Usuario cadastro com suscesso");
         _myDialog.showRes(response.statusCode);
@@ -331,32 +358,52 @@ class _CadastroUsuarioState extends State<CadastroUsuario> {
           _erroMsg = error;
         });
         break;
+      default:
+        log("Nao foi possivel realizar a operacao");
+        _myDialog.showRes(response.statusCode);
     }
   }
 
   bool validateImageAndForm() {
-    if (_image == null) {
-      setState(() {
-        _msgFotoNaoSelecionada = "Selecione uma foto";
-      });
-      _borberColorImagePicker = Colors.red;
-      return false;
-    }
+    return _validateForm() && _validateImage();
+  }
 
+  bool _validateForm() {
     var form = _formKey.currentState;
     if (!form!.validate()) return false;
 
     return true;
   }
 
+  bool _validateImage() {
+    if (_image == null) {
+      setState(() {
+        _msgFotoNaoSelecionada = "Selecione uma foto do seu veiculo";
+      });
+      _borberColorImagePicker = Colors.red;
+      return false;
+    }
+
+    return true;
+  }
+
   void _showCadastrandoDialog() {
-    _myDialog = MyDialog();
+    if (widget.modoFormulario == ModoFormulario.cadastro) {
+      _myDialog = const MyDialog(
+        msgSuccess: "Cadastro realizado com suscesso",
+      );
+    } else {
+      _myDialog = const MyDialog(
+        msgSuccess: "Dados atualizado com suscesso",
+      );
+    }
     showDialog(context: context, builder: (context) => _myDialog);
   }
 }
 
 class MyDialog extends StatefulWidget {
-  const MyDialog({Key? key}) : super(key: key);
+  final String msgSuccess;
+  const MyDialog({Key? key, required this.msgSuccess}) : super(key: key);
 
   void showRes(int statusCode) {
     _MyDialogState.currentDialog.showRespose(statusCode);
@@ -383,7 +430,7 @@ class _MyDialogState extends State<MyDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text("Cadastrando"),
+      title: const Text("Processando"),
       content: _alertContent,
       actions: _alertActions,
     );
@@ -392,8 +439,15 @@ class _MyDialogState extends State<MyDialog> {
   void showRespose(int statusCode) {
     setState(() {
       switch (statusCode) {
+        case HttpStatus.ok:
+          _alertContent = Text(widget.msgSuccess);
+          _alertActions.add(TextButton(
+            onPressed: _loadPerfil,
+            child: const Text('OK'),
+          ));
+          break;
         case HttpStatus.created:
-          _alertContent = const Text("Cadastro realizado com suscesso");
+          _alertContent = Text(widget.msgSuccess);
           _alertActions.add(TextButton(
             onPressed: () {
               Navigator.pushAndRemoveUntil(
@@ -410,12 +464,27 @@ class _MyDialogState extends State<MyDialog> {
           log("forbidden");
           break;
         default:
-          _alertContent = Text("Erro ${statusCode}");
+          _alertContent = Text("Erro $statusCode");
           _alertActions.add(TextButton(
             onPressed: () => Navigator.pop(context, 'OK'),
             child: const Text('OK'),
           ));
       }
     });
+  }
+
+  void _loadPerfil() {
+    //Navigator.pop(context);
+    //Navigator.pop(context);
+
+    Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const Home(
+            activePage: PerfilFragmento(),
+            activePageTitle: "Perfil",
+          ),
+        ),
+        (route) => false);
   }
 }
