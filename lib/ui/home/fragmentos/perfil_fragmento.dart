@@ -387,6 +387,8 @@ class _FormularioEdicaoVeiculoState extends State<FormularioEdicaoVeiculo> {
                   initValueLargura: _veiculoInfo["largura"].toString(),
                   initValueAltura: _veiculoInfo["altura"].toString(),
                   initValueComprimento: _veiculoInfo["comprimento"].toString(),
+                  initValuePlaca: _veiculoInfo["placa"],
+                  veiculoId: _veiculoInfo["id"],
                   initImage: Image.network(
                     FreteeApi.getUriPrestadoresServicoFotoVeiculo(
                         Usuario.logado.nomeUsuario),

@@ -497,7 +497,7 @@ class _FormSolicitacaoServicoState extends State<FormSolicitacaoServico> {
     solicitacaoServico["hora"] = convertHoraTo24(_horaController.text);
     solicitacaoServico["descricaoCarga"] = _descricaoController.text;
     solicitacaoServico["prestadorServicoNomeUsuario"] =
-        this.widget.prestadorServico["nomeUsuario"];
+        widget.prestadorServico["nomeUsuario"];
 
     return solicitacaoServico;
   }

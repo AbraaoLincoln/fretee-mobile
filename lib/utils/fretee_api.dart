@@ -56,8 +56,16 @@ class FreteeApi {
     return Uri.parse(url + cadastroUsuarioUrn);
   }
 
+  static Uri getUriAtualizarUsuarioInfo(int usuarioId) {
+    return Uri.parse("$url/usuario/$usuarioId");
+  }
+
   static Uri getUriCadastrarPrestadorServico() {
     return Uri.parse(url + cadastroPrestadorServicoUrn);
+  }
+
+  static Uri getUriAtualizarVeiculoInfo(int veiculoId) {
+    return Uri.parse("$url/prestador-servico/veiculo/$veiculoId");
   }
 
   static Uri getUriPrestadoresServicoProximo(

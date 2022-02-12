@@ -16,7 +16,9 @@ class CadastroPrestadorServico extends StatefulWidget {
   final String? initValueLargura;
   final String? initValueAltura;
   final String? initValueComprimento;
+  final String? initValuePlaca;
   final Image? initImage;
+  final int? veiculoId;
   final ModoFormulario modoFormulario;
   const CadastroPrestadorServico(
       {Key? key,
@@ -24,7 +26,9 @@ class CadastroPrestadorServico extends StatefulWidget {
       this.initValueAltura,
       this.initValueComprimento,
       this.initImage,
-      required this.modoFormulario})
+      required this.modoFormulario,
+      this.veiculoId,
+      this.initValuePlaca})
       : super(key: key);
 
   @override
@@ -53,6 +57,7 @@ class _CadastroPrestadorServicoState extends State<CadastroPrestadorServico> {
     _larguraTextControlle.text = widget.initValueLargura ?? "";
     _alturaTextControlle.text = widget.initValueAltura ?? "";
     _comprimentoTextControlle.text = widget.initValueComprimento ?? "";
+    _placaTextControlle.text = widget.initValuePlaca ?? "";
 
     if (widget.modoFormulario == ModoFormulario.cadastro) {
       _msg =
@@ -81,7 +86,7 @@ class _CadastroPrestadorServicoState extends State<CadastroPrestadorServico> {
               padding: const EdgeInsets.all(10),
               child: Text(
                 _msg,
-                style: TextStyle(fontSize: 17),
+                style: const TextStyle(fontSize: 17),
               ),
               decoration: BoxDecoration(
                   color: Colors.white,
@@ -224,7 +229,12 @@ class _CadastroPrestadorServicoState extends State<CadastroPrestadorServico> {
                         }
                       }
 
-                      if (widget.modoFormulario == ModoFormulario.edicao) {}
+                      if (widget.modoFormulario == ModoFormulario.edicao) {
+                        bool validateSuccessful = _validateForm();
+                        if (validateSuccessful) {
+                          _cadastrarComoPrestadorServico();
+                        }
+                      }
                     },
                     child: Text(
                       _buttonLabel,
@@ -260,21 +270,27 @@ class _CadastroPrestadorServicoState extends State<CadastroPrestadorServico> {
               )),
           controller: controller,
           validator: (value) {
-            if (value!.isEmpty) return "Insira o/a ${label}";
+            if (value!.isEmpty) return "Insira o/a $label";
           }),
     );
   }
 
   Future<void> _cadastrarComoPrestadorServico() async {
     _showCadastrandoDialog();
-    await DeviceLocation.getLocation();
+    // await DeviceLocation.getLocation();
     log("Cadastrando usuario como prestador de servico");
     log("username ${Usuario.logado.nomeUsuario}");
 
-    var request = http.MultipartRequest(
-      "POST",
-      FreteeApi.getUriCadastrarPrestadorServico(),
-    );
+    http.MultipartRequest request;
+    if (widget.modoFormulario == ModoFormulario.cadastro) {
+      request = http.MultipartRequest(
+        "POST",
+        FreteeApi.getUriCadastrarPrestadorServico(),
+      );
+    } else {
+      request = http.MultipartRequest(
+          "PUT", FreteeApi.getUriAtualizarVeiculoInfo(widget.veiculoId!));
+    }
 
     request.headers[HttpHeaders.authorizationHeader] =
         FreteeApi.getAccessToken();
@@ -284,16 +300,21 @@ class _CadastroPrestadorServicoState extends State<CadastroPrestadorServico> {
     request.fields["altura"] = _alturaTextControlle.text;
     request.fields["placa"] = _placaTextControlle.text;
 
-    var imageVeiculo =
-        await http.MultipartFile.fromPath("fotoVeiculo", _image!.path);
-
-    request.files.add(imageVeiculo);
+    if (_image != null) {
+      var imageVeiculo =
+          await http.MultipartFile.fromPath("fotoVeiculo", _image!.path);
+      request.files.add(imageVeiculo);
+    }
 
     var response = await request.send();
 
     switch (response.statusCode) {
+      case HttpStatus.ok:
+        log("Informacoes do veiculo atualizado com sucesso");
+        _myDialog.showRes(response.statusCode);
+        break;
       case HttpStatus.created:
-        log("Usuario cadastro com suscesso");
+        log("Cadastro de prestador de servico realizado com suscesso");
         _myDialog.showRes(response.statusCode);
         break;
       case HttpStatus.forbidden:
@@ -306,6 +327,17 @@ class _CadastroPrestadorServicoState extends State<CadastroPrestadorServico> {
   }
 
   bool _validateImageAndForm() {
+    return _validateForm() && _validateImage();
+  }
+
+  bool _validateForm() {
+    var form = _formKey.currentState;
+    if (!form!.validate()) return false;
+
+    return true;
+  }
+
+  bool _validateImage() {
     if (_image == null) {
       setState(() {
         _msgFotoNaoSelecionada = "Selecione uma foto do seu veiculo";
@@ -314,20 +346,26 @@ class _CadastroPrestadorServicoState extends State<CadastroPrestadorServico> {
       return false;
     }
 
-    var form = _formKey.currentState;
-    if (!form!.validate()) return false;
-
     return true;
   }
 
   void _showCadastrandoDialog() {
-    _myDialog = MyDialog();
+    if (widget.modoFormulario == ModoFormulario.cadastro) {
+      _myDialog = const MyDialog(
+        msgSuccess: "Cadastro realizado com suscesso",
+      );
+    } else {
+      _myDialog = const MyDialog(
+        msgSuccess: "Dados atualizado com suscesso",
+      );
+    }
     showDialog(context: context, builder: (context) => _myDialog);
   }
 }
 
 class MyDialog extends StatefulWidget {
-  const MyDialog({Key? key}) : super(key: key);
+  final String msgSuccess;
+  const MyDialog({Key? key, required this.msgSuccess}) : super(key: key);
 
   void showRes(int statusCode) {
     _MyDialogState.currentDialog.showRespose(statusCode);
@@ -354,7 +392,7 @@ class _MyDialogState extends State<MyDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text("Cadastrando"),
+      title: const Text("Processando"),
       content: _alertContent,
       actions: _alertActions,
     );
@@ -363,8 +401,9 @@ class _MyDialogState extends State<MyDialog> {
   void showRespose(int statusCode) {
     setState(() {
       switch (statusCode) {
+        case HttpStatus.ok:
         case HttpStatus.created:
-          _alertContent = const Text("Cadastro realizado com suscesso");
+          _alertContent = Text(widget.msgSuccess);
           _alertActions.add(TextButton(
             onPressed: _loadPerfil,
             child: const Text('OK'),
@@ -374,7 +413,7 @@ class _MyDialogState extends State<MyDialog> {
           log("forbidden");
           break;
         default:
-          _alertContent = Text("Erro ${statusCode}");
+          _alertContent = Text("Erro $statusCode");
           _alertActions.add(TextButton(
             onPressed: () => Navigator.pop(context, 'OK'),
             child: const Text('OK'),
