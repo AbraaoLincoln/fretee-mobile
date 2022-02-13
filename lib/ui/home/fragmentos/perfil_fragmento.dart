@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:fretee_mobile/business/solicitar_servico_info.dart';
 import 'package:fretee_mobile/business/usuario.dart';
 import 'package:fretee_mobile/ui/comun/modo_formulario.dart';
+import 'package:fretee_mobile/ui/info_usuario/info_usuario.dart';
 import 'package:http/http.dart' as http;
 import 'package:fretee_mobile/ui/cadastros/cadastro_prestador_servico.dart';
 import 'package:fretee_mobile/ui/cadastros/cadastro_usuario.dart';
@@ -77,8 +78,18 @@ class _PerfilFragmentoState extends State<PerfilFragmento> {
               offset: const Offset(0, 1), // changes position of shadow
             ),
           ]),
-      child: Column(
-        children: [_getUsuario(), _maisInfoUsuario()],
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => InfoUsuario(
+                      userImage: _usuarioLogadoImage!, userInfo: _userInfo!)));
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [_getUsuario()],
+        ),
       ),
     );
   }
@@ -88,10 +99,13 @@ class _PerfilFragmentoState extends State<PerfilFragmento> {
       children: [
         ClipRRect(
             borderRadius: BorderRadius.circular(50), child: _getUsuarioImage()),
-        Text(
-          _userInfo!["nomeCompleto"] ?? "Nome nao informado",
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-          textAlign: TextAlign.center,
+        Container(
+          margin: const EdgeInsets.only(top: 20, bottom: 20),
+          child: Text(
+            _userInfo!["nomeCompleto"] ?? "Nome nao informado",
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+            textAlign: TextAlign.center,
+          ),
         )
       ],
     );
