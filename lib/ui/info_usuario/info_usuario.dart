@@ -42,8 +42,8 @@ class InfoUsuario extends StatelessWidget {
       _constuirInfo("Nome usuario", userInfo["nomeUsuario"]),
       _constuirInfo("Telefone", userInfo["telefone"]),
       _constuirInfo("Usa o app desde", userInfo["dataCriacao"]),
-      _constuirInfo("Reputacao contratante", userInfo["reputacao"].toString(),
-          Icons.star, Colors.amber),
+      _constuirInfo("Reputacao contratante",
+          userInfo["reputacao"].toStringAsFixed(1), Icons.star, Colors.amber),
       _constuirInfo(
           "Fretes contratados",
           userInfo["numeroDeFretesContratados"].toString(),
@@ -54,7 +54,7 @@ class InfoUsuario extends StatelessWidget {
     if (userInfo["prestadorServico"] != null) {
       informacoesDoUsuario.add(_constuirInfo(
           "Reputacao prestador servico",
-          userInfo["prestadorServico"]["reputacao"].toString(),
+          userInfo["prestadorServico"]["reputacao"].toStringAsFixed(1),
           Icons.star,
           Colors.amber));
       informacoesDoUsuario.add(_constuirInfo(

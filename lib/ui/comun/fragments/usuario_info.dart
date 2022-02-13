@@ -53,7 +53,7 @@ class UsuarioInfo extends StatelessWidget {
                     color: Colors.amber,
                   ),
                   Text(
-                    usuarioInfo["reputacao"].toString(),
+                    usuarioInfo["reputacao"].toStringAsFixed(1),
                     style: const TextStyle(color: Colors.white, fontSize: 16),
                   )
                 ]),

@@ -217,7 +217,7 @@ class _BuscaPrestadoresServicoFragmentoState
                                     ? (prestadorServico["reputacao"] == 0
                                         ? "Novo"
                                         : prestadorServico["reputacao"]
-                                            .toString())
+                                            .toStringAsFixed(1))
                                     : "0")
                               ]),
                               Row(children: [
