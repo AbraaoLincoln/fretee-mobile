@@ -235,6 +235,11 @@ class AvaliaPreco extends StatelessWidget {
             freteInfo: freteInfo,
             camposAdicionas: [
               {
+                "label": "Precisa ajudante",
+                "valor": freteInfo["precisaAjudade"] ? "sim" : "nao",
+                "icon": Icons.supervised_user_circle
+              },
+              {
                 "label": "Preço",
                 "valor": freteInfo["preco"],
                 "icon": Icons.monetization_on
@@ -319,7 +324,6 @@ class _InformaPrecoState extends State<InformaPreco> {
       Map<String, dynamic> freteInfo,
       Map<String, dynamic> usuarioInfo,
       BuildContext context) {
-    log("Informar Preco Widget");
     if (visao == Visao.prestadorServico) {
       return Column(
         children: [
@@ -373,10 +377,32 @@ class _InformaPrecoState extends State<InformaPreco> {
       child: Column(
         children: [
           UsuarioInfo(usuarioInfo: usuarioInfo),
-          ServicoInfo(freteInfo: freteInfo)
+          ServicoInfo(
+            freteInfo: freteInfo,
+            camposAdicionas: _getCamposAdicionais(freteInfo),
+          )
         ],
       ),
     );
+  }
+
+  List<Map<String, dynamic>> _getCamposAdicionais(
+      Map<String, dynamic> freteInfo) {
+    List<Map<String, dynamic>> infoComplementar = [];
+
+    Map<String, dynamic> precisaAjudante = {
+      "label": "Precisa ajudante",
+      "icon": Icons.supervised_user_circle
+    };
+
+    if (freteInfo["precisaAjudade"]) {
+      precisaAjudante["valor"] = "sim";
+    } else {
+      precisaAjudante["valor"] = "nao";
+    }
+
+    infoComplementar.add(precisaAjudante);
+    return infoComplementar;
   }
 
   Widget _construirPrecoServico() {

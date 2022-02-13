@@ -95,6 +95,7 @@ class _InfoFreteState extends State<InfoFrete> {
         ServicoInfo(
           freteInfo: frete!,
           withShadow: true,
+          camposAdicionas: _getInfoComplementarDeAcordoComAVisao(),
         ),
         _construirBotoes()
       ]);
@@ -102,12 +103,38 @@ class _InfoFreteState extends State<InfoFrete> {
       return Column(children: [
         UsuarioInfo(usuarioInfo: usuarioInfo!),
         ServicoInfo(
-          freteInfo: frete!,
-          withShadow: true,
-        ),
+            freteInfo: frete!,
+            withShadow: true,
+            camposAdicionas: _getInfoComplementarDeAcordoComAVisao()),
         _construirBotoes()
       ]);
     }
+  }
+
+  List<Map<String, dynamic>> _getInfoComplementarDeAcordoComAVisao() {
+    List<Map<String, dynamic>> infoComplementar = [];
+
+    infoComplementar.add({
+      "label": "Precisa ajudante",
+      "valor": frete!["precisaAjudade"] ? "sim" : "nao",
+      "icon": Icons.supervised_user_circle
+    });
+
+    infoComplementar.add({
+      "label": "Telefone",
+      "valor": usuarioInfo!["telefone"],
+      "icon": Icons.phone
+    });
+
+    if (visao == Visao.contratante) {
+      infoComplementar.add({
+        "label": "Placa",
+        "valor": _veiculo.info["placa"],
+        "icon": Icons.calendar_view_day_outlined
+      });
+    }
+
+    return infoComplementar;
   }
 
   Future<void> _getAdicionaInfo() async {

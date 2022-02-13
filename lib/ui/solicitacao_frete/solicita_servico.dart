@@ -289,6 +289,7 @@ class _FormSolicitacaoServicoState extends State<FormSolicitacaoServico> {
   final TextEditingController _precisaAjudanteController =
       TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool precisaAjudante = false;
 
   @override
   void initState() {
@@ -344,12 +345,13 @@ class _FormSolicitacaoServicoState extends State<FormSolicitacaoServico> {
                       height: 20,
                       color: Colors.grey.shade600,
                     ),
-                    _construirTextInfoServico(
-                        "Precisa de Ajudante ?",
-                        Icons.supervised_user_circle,
-                        1,
-                        _precisaAjudanteController,
-                        false),
+                    // _construirTextInfoServico(
+                    //     "Precisa de Ajudante ?",
+                    //     Icons.supervised_user_circle,
+                    //     1,
+                    //     _precisaAjudanteController,
+                    //     false),
+                    _construirPrecisaAjudante()
                   ],
                 )),
             decoration: BoxDecoration(
@@ -385,6 +387,50 @@ class _FormSolicitacaoServicoState extends State<FormSolicitacaoServico> {
                     //isDense: true,
                     contentPadding: const EdgeInsets.fromLTRB(10, 0, 10, 0)))),
         SizedBox(width: 50, child: Icon(icon ?? Icons.warning, size: 25))
+      ],
+    );
+  }
+
+  String valueDropdown = "nao";
+  Widget _construirPrecisaAjudante() {
+    return Row(
+      children: [
+        Expanded(
+            child: TextFormField(
+                style: const TextStyle(fontWeight: FontWeight.bold),
+                decoration: InputDecoration(
+                    label: RichText(
+                        text: const TextSpan(
+                            text: "Precisa ajudante ?",
+                            style:
+                                TextStyle(color: Colors.black, fontSize: 18))),
+                    border: InputBorder.none,
+                    //isDense: true,
+                    contentPadding: const EdgeInsets.fromLTRB(10, 0, 10, 0)))),
+        Expanded(
+            child: DropdownButton(
+          hint: const Text("Precisa ajudante ?"),
+          value: valueDropdown,
+          onChanged: (String? newValue) {
+            setState(() {
+              valueDropdown = newValue!;
+
+              if (newValue == "sim") {
+                precisaAjudante = true;
+              } else {
+                precisaAjudante = false;
+              }
+            });
+          },
+          items: ["sim", "nao"]
+              .map((e) => DropdownMenuItem<String>(
+                    value: e,
+                    child: Text(e),
+                  ))
+              .toList(),
+        )),
+        const SizedBox(
+            width: 50, child: Icon(Icons.supervised_user_circle, size: 25))
       ],
     );
   }
@@ -498,6 +544,7 @@ class _FormSolicitacaoServicoState extends State<FormSolicitacaoServico> {
     solicitacaoServico["descricaoCarga"] = _descricaoController.text;
     solicitacaoServico["prestadorServicoNomeUsuario"] =
         widget.prestadorServico["nomeUsuario"];
+    solicitacaoServico["precisaAjudade"] = precisaAjudante.toString();
 
     return solicitacaoServico;
   }
@@ -518,7 +565,7 @@ class _FormSolicitacaoServicoState extends State<FormSolicitacaoServico> {
       if (hora.toLowerCase().contains("am")) {
         List<String> horaAmParts = horaParts[0].split(":");
         int horaAm = int.parse(horaAmParts[0]);
-        if (horaAm < 12) {
+        if (horaAm < 10) {
           hora24 = "0${horaAm.toString()}:${horaAmParts[1]}";
         }
       }
