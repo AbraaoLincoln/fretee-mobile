@@ -19,7 +19,15 @@ class InfoFrete extends StatefulWidget {
   final String visao;
   final Map<String, dynamic>? frete;
   final int? freteId;
-  const InfoFrete({Key? key, this.frete, required this.visao, this.freteId})
+  final bool? hasActions;
+  final Widget? message;
+  const InfoFrete(
+      {Key? key,
+      this.frete,
+      required this.visao,
+      this.freteId,
+      this.hasActions,
+      this.message})
       : super(key: key);
 
   @override
@@ -32,6 +40,8 @@ class _InfoFreteState extends State<InfoFrete> {
   late final int? freteId;
   Map<String, dynamic>? usuarioInfo;
   final VeiculoInfo _veiculo = VeiculoInfo();
+  late bool hasActions;
+  Widget? message;
 
   @override
   void initState() {
@@ -40,6 +50,8 @@ class _InfoFreteState extends State<InfoFrete> {
     visao = widget.visao;
     frete = widget.frete;
     freteId = widget.freteId;
+    hasActions = widget.hasActions ?? true;
+    message = widget.message;
   }
 
   @override
@@ -87,27 +99,53 @@ class _InfoFreteState extends State<InfoFrete> {
 
   Widget _construirFreteInfoDeAcordoComAVisao() {
     if (visao == Visao.contratante) {
-      return Column(children: [
-        UsuarioInfo(usuarioInfo: usuarioInfo!),
-        InfoVeiculo(
-            nomeUsuarioPrestadorServico: frete!["prestadorServicoNomeUsuario"],
-            veiculo: _veiculo),
-        ServicoInfo(
-          freteInfo: frete!,
-          withShadow: true,
-          camposAdicionas: _getInfoComplementarDeAcordoComAVisao(),
-        ),
-        _construirBotoes()
-      ]);
+      Map<String, dynamic> prestadorServico = {};
+
+      prestadorServico["nomeUsuario"] = usuarioInfo!["nomeUsuario"];
+      prestadorServico["reputacao"] =
+          usuarioInfo!["prestadorServico"]["reputacao"];
+      prestadorServico["distancia"] = usuarioInfo!["distancia"];
+
+      List<Widget> infoFrete = [];
+
+      if (message != null) {
+        infoFrete.add(message!);
+      }
+
+      infoFrete.add(UsuarioInfo(usuarioInfo: prestadorServico));
+      infoFrete.add(InfoVeiculo(
+          nomeUsuarioPrestadorServico: frete!["prestadorServicoNomeUsuario"],
+          veiculo: _veiculo));
+      infoFrete.add(ServicoInfo(
+        freteInfo: frete!,
+        withShadow: true,
+        camposAdicionas: _getInfoComplementarDeAcordoComAVisao(),
+      ));
+
+      if (hasActions) {
+        infoFrete.add(_construirBotoes());
+      }
+
+      return Column(children: infoFrete);
     } else {
-      return Column(children: [
-        UsuarioInfo(usuarioInfo: usuarioInfo!),
-        ServicoInfo(
-            freteInfo: frete!,
-            withShadow: true,
-            camposAdicionas: _getInfoComplementarDeAcordoComAVisao()),
-        _construirBotoes()
-      ]);
+      List<Widget> infoFrete = [];
+
+      if (message != null) {
+        infoFrete.add(message!);
+      }
+
+      infoFrete.add(UsuarioInfo(usuarioInfo: usuarioInfo!));
+      infoFrete.add(ServicoInfo(
+        freteInfo: frete!,
+        withShadow: true,
+        camposAdicionas: _getInfoComplementarDeAcordoComAVisao(),
+      ));
+
+      if (hasActions) {
+        infoFrete.add(_construirBotoes());
+      }
+
+      return Column(children: infoFrete);
     }
   }
 

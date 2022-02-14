@@ -29,7 +29,25 @@ class _NotificacaoFragmentoState extends State<NotificacaoFragmento> {
   }
 
   Widget _construirNotificacao(
-      String label, IconData icon, Color iconColor, void Function() callback) {
+      String label, IconData icon, Color iconColor, void Function()? callback) {
+    Widget texto;
+
+    if (callback != null) {
+      texto =
+          _construirNotificacaoText(label, "Toque aqui para mais informações.");
+    } else {
+      texto = Container(
+        width: 300,
+        margin: const EdgeInsets.only(left: 10),
+        child: Text(
+          label,
+          style: const TextStyle(
+              fontSize: 20, color: Colors.black, fontWeight: FontWeight.bold),
+          overflow: TextOverflow.clip,
+        ),
+      );
+    }
+
     return InkWell(
         onTap: callback,
         child: Container(
@@ -39,11 +57,7 @@ class _NotificacaoFragmentoState extends State<NotificacaoFragmento> {
               color: Colors.grey.shade200,
               borderRadius: BorderRadius.circular(10)),
           child: Row(
-            children: [
-              Icon(icon, size: 50, color: iconColor),
-              _construirNotificacaoText(
-                  label, "Toque aqui para mais informações.")
-            ],
+            children: [Icon(icon, size: 50, color: iconColor), texto],
           ),
         ));
   }
@@ -187,6 +201,14 @@ class _NotificacaoFragmentoState extends State<NotificacaoFragmento> {
   }
 
   Widget _buildNotificacao(dynamic notificacao) {
+    String visao;
+
+    if (Usuario.logado.nomeUsuario == notificacao["prestadorServico"]) {
+      visao = Visao.prestadorServico;
+    } else {
+      visao = Visao.contratante;
+    }
+
     switch (notificacao["status"]) {
       case StatusFrete.solicitando:
         return _construirNotificacao(
@@ -200,11 +222,45 @@ class _NotificacaoFragmentoState extends State<NotificacaoFragmento> {
           );
         });
       case StatusFrete.solicitacaoCancelada:
-        return _construirNotificacao(
-            "Solicitação Cancelada", Icons.error, Colors.red.shade800, () {});
+        String label = "Solicitação Cancelada";
+        if (visao == Visao.prestadorServico) {
+          label = "Solicitação Cancelada pelo contratante";
+        }
+
+        return _construirNotificacao(label, Icons.error, Colors.red.shade800,
+            () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => InfoFrete(
+                  freteId: notificacao["id"],
+                  visao: visao,
+                  hasActions: false,
+                  message: _construirNotificacao(
+                      label, Icons.error, Colors.red.shade800, null),
+                ),
+              ));
+        });
+
       case StatusFrete.solicitacaoRecusada:
-        return _construirNotificacao(
-            "Solicitação Recusada", Icons.cancel, Colors.red.shade800, () {});
+        String label = "Solicitação Recusada";
+        if (visao == Visao.contratante) {
+          label = "Solicitação Recusada pelo prestador de serviço";
+        }
+        return _construirNotificacao(label, Icons.cancel, Colors.red.shade800,
+            () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => InfoFrete(
+                  freteId: notificacao["id"],
+                  visao: visao,
+                  hasActions: false,
+                  message: _construirNotificacao(
+                      label, Icons.cancel, Colors.red.shade800, null),
+                ),
+              ));
+        });
       case StatusFrete.precoInformado:
         return _construirNotificacao(
             "Preço Informado", Icons.monetization_on, Colors.amber.shade400,
@@ -225,7 +281,19 @@ class _NotificacaoFragmentoState extends State<NotificacaoFragmento> {
             Colors.green.shade500, () {});
       case StatusFrete.cancelado:
         return _construirNotificacao(
-            "Frete cancelado", Icons.cancel, Colors.red.shade800, () {});
+            "Frete cancelado", Icons.cancel, Colors.red.shade800, () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => InfoFrete(
+                  freteId: notificacao["id"],
+                  visao: visao,
+                  hasActions: false,
+                  message: _construirNotificacao("Frete cancelado",
+                      Icons.cancel, Colors.red.shade800, null),
+                ),
+              ));
+        });
       case StatusFrete.contratanteFinalizou:
         if (Usuario.logado.nomeUsuario == notificacao["contratante"]) {
           return _construirNotificacao("Você marcou o frete como concluido",
@@ -264,10 +332,22 @@ class _NotificacaoFragmentoState extends State<NotificacaoFragmento> {
         }
       case StatusFrete.finalizado:
         return _construirNotificacao(
-            "Frete concluido", Icons.done_all, Colors.green.shade500, () {});
+            "Frete concluido", Icons.done_all, Colors.green.shade500, () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => InfoFrete(
+                  freteId: notificacao["id"],
+                  visao: visao,
+                  hasActions: false,
+                  message: _construirNotificacao("Frete concluido",
+                      Icons.done_all, Colors.green.shade500, null),
+                ),
+              ));
+        });
       default:
         return _construirNotificacao(
-            "Status não definido", Icons.not_interested, Colors.black, () {});
+            "Status não definido", Icons.not_interested, Colors.black, null);
     }
   }
 

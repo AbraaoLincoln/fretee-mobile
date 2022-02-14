@@ -117,7 +117,7 @@ class _SolicitarServicoState extends State<SolicitarServico> {
                   Text(prestadorServico["reputacao"] != null
                       ? (prestadorServico["reputacao"] == 0
                           ? "Novo"
-                          : prestadorServico["reputacao"].toString())
+                          : prestadorServico["reputacao"].toStringAsFixed(1))
                       : "0")
                 ]),
                 Container(
